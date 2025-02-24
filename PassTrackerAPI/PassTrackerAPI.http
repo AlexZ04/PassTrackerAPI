@@ -1,0 +1,6 @@
+@PassTrackerAPI_HostAddress = http://localhost:5098
+
+GET {{PassTrackerAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

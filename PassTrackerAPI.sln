@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35818.85 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PassTrackerAPI", "PassTrackerAPI\PassTrackerAPI.csproj", "{F0FBD9F0-C77D-4AD8-9AD9-4B72192C8CF7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F0FBD9F0-C77D-4AD8-9AD9-4B72192C8CF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0FBD9F0-C77D-4AD8-9AD9-4B72192C8CF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0FBD9F0-C77D-4AD8-9AD9-4B72192C8CF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0FBD9F0-C77D-4AD8-9AD9-4B72192C8CF7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95E65475-AF44-4C94-BEC7-ACF1C53B35AE}
+	EndGlobalSection
+EndGlobal
