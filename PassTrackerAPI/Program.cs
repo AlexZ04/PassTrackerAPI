@@ -75,6 +75,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin();
+        policy.AllowAnyHeader();
+        policy.AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -95,6 +105,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseAuthorization();
 
+app.UseCors();
 app.MapControllers();
 
 app.Run();
