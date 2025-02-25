@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Data;
+using PassTrackerAPI.Services;
+using PassTrackerAPI.Services.ServisesImplementations;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,7 @@ builder.Services.AddSwaggerGen();
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(connection));
+builder.Services.AddTransient<IUserService, UserServiceImpl>();
 
 var app = builder.Build();
 
