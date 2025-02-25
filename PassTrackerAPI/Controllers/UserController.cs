@@ -4,6 +4,7 @@ using PassTrackerAPI.Services;
 namespace PassTrackerAPI.Controllers;
 
 [ApiController]
+[Route("user")]
 public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
@@ -14,6 +15,14 @@ public class UserController : ControllerBase
         _logger = logger;
         _userService = userService;
     }
+
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register()
+    {
+        return Ok();
+    }
+
 
     [HttpPost("login")]
     public async Task<IActionResult> LoginUser()

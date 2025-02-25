@@ -1,7 +1,10 @@
-﻿namespace PassTrackerAPI.Services
+﻿using PassTrackerAPI.DTO;
+
+namespace PassTrackerAPI.Services
 {
     public interface IUserService
     {
-        public Task<int> LoginUser();
+        public Task<TokenResponseDTO> RegisterUser();
+        public Task<TokenResponseDTO> LoginUser();
     }
 }
