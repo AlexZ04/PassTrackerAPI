@@ -19,6 +19,7 @@ var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(connection));
 builder.Services.AddTransient<IUserService, UserServiceImpl>();
+builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 
 var app = builder.Build();
 
