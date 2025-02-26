@@ -4,12 +4,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
+using PassTrackerAPI.Middleware;
 using PassTrackerAPI.Services;
 using PassTrackerAPI.Services.ServisesImplementations;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Add services to the container.
 
@@ -100,6 +104,8 @@ using var serviceScope = app.Services.CreateScope();
 var context = serviceScope.ServiceProvider.GetService<DataContext>();
 
 context?.Database.Migrate();
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
+using PassTrackerAPI.Exceptions;
 
 namespace PassTrackerAPI.Services.ServisesImplementations
 {
@@ -24,9 +26,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
 
             if (foundUserByEmail != null)
-            {
-                // throw exctention
-            }
+                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
 
             UserDb newUser = new UserDb
             {
