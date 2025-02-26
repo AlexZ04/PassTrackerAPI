@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using PassTrackerAPI.DTO;
 using PassTrackerAPI.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace PassTrackerAPI.Controllers;
 
@@ -18,9 +20,9 @@ public class UserController : ControllerBase
 
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register()
+    public async Task<IActionResult> Register([FromBody, Required] UserRegisterDTO user)
     {
-        return Ok();
+        return Ok(await _userService.RegisterUser(user));
     }
 
 

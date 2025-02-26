@@ -12,7 +12,7 @@ using PassTrackerAPI.Data;
 namespace PassTrackerAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250226050837_Initial")]
+    [Migration("20250226053603_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -31,9 +31,8 @@ namespace PassTrackerAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CreateTime")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()

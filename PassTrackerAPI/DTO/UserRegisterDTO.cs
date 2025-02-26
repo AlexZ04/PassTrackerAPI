@@ -6,8 +6,6 @@ namespace PassTrackerAPI.DTO
     public class UserRegisterDTO
     {
         [Required]
-        public Guid Id { get; set; }
-        [Required]
         [MinLength(1)]
         [MaxLength(100)]
         public string SecondName { get; set; }
@@ -20,7 +18,10 @@ namespace PassTrackerAPI.DTO
         [MaxLength(100)]
         public string MiddleName { get; set; }
         [AllowNull]
-        public string? GroupNumber { get; set; }
+        public int? Group { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
         [Required]
         public string Password { get; set; }
     }

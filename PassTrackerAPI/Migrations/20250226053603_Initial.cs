@@ -22,7 +22,7 @@ namespace PassTrackerAPI.Migrations
                     Group = table.Column<int>(type: "integer", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
-                    CreateTime = table.Column<string>(type: "text", nullable: false)
+                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
