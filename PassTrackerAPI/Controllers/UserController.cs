@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Services;
@@ -30,5 +31,11 @@ public class UserController : ControllerBase
     public async Task<IActionResult> LoginUser([FromBody, Required] UserLoginDTO user)
     {
         return Ok(await _userService.LoginUser(user));
-    }    
+    }
+
+    [HttpGet("profile/{id}")]
+    public async Task<IActionResult> GetProfileById([Required] Guid id)
+    {
+        return Ok(await _userService.GetUserProfileById(id));
+    }
 }

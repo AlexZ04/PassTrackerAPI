@@ -70,5 +70,29 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             return new TokenResponseDTO(token);
         }
+
+        public async Task<UserProfileDTO> GetUserProfileById(Guid id)
+        {
+            var user = await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+
+            }
+
+            var userInfo = new UserProfileDTO
+            {
+                Name = user.SecondName + " " + user.FirstName + " " + user.MiddleName,
+                Group = user.Group,
+                Roles = new List<RoleDb>()
+            };
+
+            foreach (var elem in user.Roles)
+                userInfo.Roles.Add(elem.Role);
+
+            return userInfo;
+        }
     }
 }
