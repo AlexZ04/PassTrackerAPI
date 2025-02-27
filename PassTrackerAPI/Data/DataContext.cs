@@ -7,6 +7,7 @@ namespace PassTrackerAPI.Data
     {
         public DbSet<UserDb> Users { get; set; }
         public DbSet<AdminDb> Admins { get; set; }
+        public DbSet<UserRoleDb> UserRoles { get; set; }
 
         public DataContext(DbContextOptions options) : base(options) { }
 
@@ -17,6 +18,9 @@ namespace PassTrackerAPI.Data
 
             modelBuilder.Entity<AdminDb>().HasKey(x => x.Id);
             modelBuilder.Entity<AdminDb>().ToTable("admins");
+
+            modelBuilder.Entity<UserRoleDb>().HasKey(x => x.Id);
+            modelBuilder.Entity<UserRoleDb>().ToTable("roles");
 
             base.OnModelCreating(modelBuilder);
         }

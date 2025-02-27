@@ -38,8 +38,18 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 Email = user.Email,
                 Password = _hasherService.HashPassword(user.Password),
                 CreateTime = DateTime.Now.ToUniversalTime(),
+                Roles = new List<UserRoleDb>()
             };
 
+            UserRoleDb newRole = new UserRoleDb
+            {
+                User = newUser,
+                Role = RoleDb.New
+            };
+
+            newUser.Roles.Add(newRole);
+
+            _context.UserRoles.Add(newRole);
             _context.Users.Add(newUser);
 
             await _context.SaveChangesAsync();
