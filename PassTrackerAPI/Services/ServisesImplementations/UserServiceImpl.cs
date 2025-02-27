@@ -49,10 +49,16 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return new TokenResponseDTO(token);
         }
 
-        public async Task<TokenResponseDTO> LoginUser()
+        public async Task<TokenResponseDTO> LoginUser(UserLoginDTO user)
         {
-            // todo
-            return new TokenResponseDTO("1");
+            var foundUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+
+            if (foundUser == null || _hasherService.CheckPassword(foundUser.Password, user.Password))
+                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.INVALID_CREDENTIALS);
+
+            string token = _tokenService.CreateAccessTokenById(foundUser.Id);
+
+            return new TokenResponseDTO(token);
         }
     }
 }
