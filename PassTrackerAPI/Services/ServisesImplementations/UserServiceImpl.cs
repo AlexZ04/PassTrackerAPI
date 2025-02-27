@@ -53,7 +53,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             var foundUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
 
-            if (foundUser == null || _hasherService.CheckPassword(foundUser.Password, user.Password))
+            if (foundUser == null || !_hasherService.CheckPassword(foundUser.Password, user.Password))
                 throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.INVALID_CREDENTIALS);
 
             string token = _tokenService.CreateAccessTokenById(foundUser.Id);
