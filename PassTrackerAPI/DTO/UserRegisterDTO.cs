@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PassTrackerAPI.Data;
+using PassTrackerAPI.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PassTrackerAPI.DTO
 {
-    public class UserRegisterDTO
+    public class UserRegisterDTO //: IValidatableObject
     {
         [Required]
         [MinLength(1)]
@@ -24,5 +26,25 @@ namespace PassTrackerAPI.DTO
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
+        
+
+        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        //{
+            
+
+        //    if(Email == "user@example.com")
+        //    {
+        //        yield return new ValidationResult(
+        //            $"Email error",
+        //            new[] { nameof(Email) });
+        //    }
+        //    if (FirstName == "string")
+        //    {
+        //        yield return new ValidationResult(
+        //            $"FirstName error.",
+        //            new[] { nameof(Email) });
+        //    }
+        //}
     }
+
 }

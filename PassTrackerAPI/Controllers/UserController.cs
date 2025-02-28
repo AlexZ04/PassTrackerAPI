@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Services;
 using System.ComponentModel.DataAnnotations;
@@ -16,13 +17,22 @@ public class UserController : ControllerBase
     {
         _logger = logger;
         _userService = userService;
+
     }
 
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody, Required] UserRegisterDTO user)
     {
-        return Ok(await _userService.RegisterUser(user));
+        TokenResponseDTO? tokenResponse = await _userService.RegisterUser(user, ModelState);
+
+        if (tokenResponse == null)
+        {
+            return ValidationProblem(); 
+        }
+        return Ok(tokenResponse);
+        
+
     }
 
 
@@ -31,4 +41,5 @@ public class UserController : ControllerBase
     {
         return Ok(await _userService.LoginUser(user));
     }    
+
 }
