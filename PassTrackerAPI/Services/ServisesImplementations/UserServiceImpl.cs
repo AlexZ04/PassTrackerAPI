@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+
 
 namespace PassTrackerAPI.Services.ServisesImplementations
 {
@@ -21,12 +22,17 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _tokenService = tokenService;
         }
 
-        public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
+        public async Task CheckEmail(string email)
         {
-            var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (foundUserByEmail != null)
                 throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
+        }
+
+        public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
+        {
+            await CheckEmail(user.Email);
 
             UserDb newUser = new UserDb
             {

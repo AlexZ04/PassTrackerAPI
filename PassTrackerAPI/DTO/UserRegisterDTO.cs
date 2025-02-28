@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PassTrackerAPI.Data;
+using PassTrackerAPI.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PassTrackerAPI.DTO
@@ -25,4 +27,5 @@ namespace PassTrackerAPI.DTO
         [Required]
         public string Password { get; set; }
     }
+
 }

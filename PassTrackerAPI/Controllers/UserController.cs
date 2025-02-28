@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Services;
 using System.ComponentModel.DataAnnotations;
@@ -10,12 +11,10 @@ namespace PassTrackerAPI.Controllers;
 [Route("user")]
 public class UserController : ControllerBase
 {
-    private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;
 
-    public UserController(ILogger<UserController> logger, IUserService userService)
+    public UserController(IUserService userService)
     {
-        _logger = logger;
         _userService = userService;
     }
 
