@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
-using System.Threading.Tasks;
 
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -24,33 +22,17 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _tokenService = tokenService;
         }
 
-        public async Task FindEmail(string email, DataContext dataContext, ModelStateDictionary modelState)
+        public async Task CheckEmail(string email)
         {
-            var foundUserByEmail = await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (foundUserByEmail != null)
-            {
-                modelState.AddModelError("email", "wrong email");
-            }
+                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
         }
 
-        public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user, ModelStateDictionary modelState)
+        public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
         {
-            //var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-
-            //if (foundUserByEmail != null)
-            //{
-            //    modelState.AddModelError("email", "wrong email");
-            //}
-            await FindEmail(user.Email, _context, modelState);
-            
-            //    throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
-
-            if(!modelState.IsValid)
-            {
-                return null;
-            }
-
+            await CheckEmail(user.Email);
 
             UserDb newUser = new UserDb
             {
