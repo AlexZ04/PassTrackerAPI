@@ -37,4 +37,11 @@ public class UserController : ControllerBase
     {
         return Ok(await _userService.GetUserProfileById(id));
     }
+
+    [HttpGet("profile")]
+    [Authorize]
+    public async Task<IActionResult> GetProfile()
+    {
+        return Ok(await _userService.GetProfile(User));
+    }
 }

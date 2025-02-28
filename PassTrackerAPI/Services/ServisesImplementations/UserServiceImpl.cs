@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using System.Security.Claims;
 
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -20,14 +22,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context = context;
             _hasherService = hasherService;
             _tokenService = tokenService;
-        }
-
-        public async Task CheckEmail(string email)
-        {
-            var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (foundUserByEmail != null)
-                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
         }
 
         public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
@@ -99,6 +93,24 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 userInfo.Roles.Add(elem.Role);
 
             return userInfo;
+        }
+
+        public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                throw new UnauthorizedAccessException();
+
+            return GetUserProfileById(new Guid(userId));
+        }
+
+        public async Task CheckEmail(string email)
+        {
+            var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (foundUserByEmail != null)
+                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
         }
     }
 }
