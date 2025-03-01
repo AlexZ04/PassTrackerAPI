@@ -70,6 +70,20 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return new TokenResponseDTO(token);
         }
 
+        public async Task Logout(string? token)
+        {
+            await CheckToken(token);
+
+            var blacklistToken = new BlacklistTokenDb
+            {
+                Token = token,
+                AddTime = DateTime.Now.ToUniversalTime(),
+            };
+
+            _context.BlacklistTokens.Add(blacklistToken);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<UserProfileDTO> GetUserProfileById(Guid id)
         {
             var user = await _context.Users
@@ -130,7 +144,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (foundUserByEmail != null)
-                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
+                throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.EMAIL_IS_ALREADY_USED);
+        }
+
+        private async Task CheckToken(string? token)
+        {
+            if (token == null || await _context.BlacklistTokens.FindAsync(token) != null)
+                throw new UnauthorizedAccessException();
         }
 
         private string ConcatName(string secondName, string firstName, string thirdName)

@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PassTrackerAPI.DTO;
+using PassTrackerAPI.Filters;
 using PassTrackerAPI.Services;
 using System.ComponentModel.DataAnnotations;
 
@@ -31,7 +33,19 @@ public class UserController : ControllerBase
         return Ok(await _userService.LoginUser(user));
     }
 
+    [HttpPost("logout")]
+    [Authorize]
+    [CheckTokenLife]
+    public async Task<IActionResult> Logout()
+    {
+        await _userService.Logout(HttpContext.GetTokenAsync("access_token").Result);
+
+        return Ok();
+    }
+
     [HttpGet("profile/{id}")]
+    [Authorize]
+    [CheckTokenLife]
     public async Task<IActionResult> GetProfileById([Required] Guid id)
     {
         return Ok(await _userService.GetUserProfileById(id));
@@ -39,6 +53,7 @@ public class UserController : ControllerBase
 
     [HttpGet("profile")]
     [Authorize]
+    [CheckTokenLife]
     public async Task<IActionResult> GetProfile()
     {
         return Ok(await _userService.GetProfile(User));
@@ -46,6 +61,7 @@ public class UserController : ControllerBase
 
     [HttpGet("users")]
     [Authorize]
+    [CheckTokenLife]
     public async Task<IActionResult> GetAllUsers()
     {
         return Ok(await _userService.GetAllUsers());

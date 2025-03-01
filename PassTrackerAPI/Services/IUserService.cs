@@ -10,5 +10,6 @@ namespace PassTrackerAPI.Services
         public Task<UserProfileDTO> GetUserProfileById(Guid id);
         public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user);
         public Task<List<UserShortDTO>> GetAllUsers();
+        public Task Logout(string? token);
     }
 }
