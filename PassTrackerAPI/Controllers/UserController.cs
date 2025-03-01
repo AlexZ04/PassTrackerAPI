@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Services;
 using System.ComponentModel.DataAnnotations;
@@ -43,5 +42,12 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         return Ok(await _userService.GetProfile(User));
+    }
+
+    [HttpGet("users")]
+    [Authorize]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        return Ok(await _userService.GetAllUsers());
     }
 }

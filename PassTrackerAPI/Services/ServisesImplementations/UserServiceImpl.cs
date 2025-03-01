@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -26,7 +25,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
         {
-            await CheckEmail(user.Email);
+            await CheckEmailIfUsed(user.Email);
 
             UserDb newUser = new UserDb
             {
@@ -64,7 +63,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             var foundUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
 
             if (foundUser == null || !_hasherService.CheckPassword(foundUser.Password, user.Password))
-                throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.INVALID_CREDENTIALS);
+                throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.INVALID_CREDENTIALS);
 
             string token = _tokenService.CreateAccessTokenById(foundUser.Id);
 
@@ -78,13 +77,11 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
-            {
-
-            }
+                throw new KeyNotFoundException();
 
             var userInfo = new UserProfileDTO
             {
-                Name = user.SecondName + " " + user.FirstName + " " + user.MiddleName,
+                Name = ConcatName(user.SecondName, user.FirstName, user.MiddleName),
                 Group = user.Group,
                 Roles = new List<RoleDb>()
             };
@@ -105,12 +102,40 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return GetUserProfileById(new Guid(userId));
         }
 
-        public async Task CheckEmail(string email)
+        // get all not-new (confirmed) users
+        public async Task<List<UserShortDTO>> GetAllUsers()
+        {
+            var allUsers = await _context.Users
+                .Include(u => u.Roles)
+                .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                .ToListAsync();
+
+            List<UserShortDTO> res = new List<UserShortDTO>();
+
+            foreach (var user in allUsers)
+            {
+                res.Add(new UserShortDTO
+                {
+                    Id = user.Id,
+                    Name = ConcatName(user.SecondName, user.FirstName, user.MiddleName),
+                    Group = user.Group
+                });
+            }
+
+            return res;
+        }
+
+        private async Task CheckEmailIfUsed(string email)
         {
             var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (foundUserByEmail != null)
                 throw new CredentialsException(ErrorTitles.CREDENTIALS_EXCEPTION, ErrorMessages.EMAIL_IS_ALREADY_USED);
+        }
+
+        private string ConcatName(string secondName, string firstName, string thirdName)
+        {
+            return secondName + " " + firstName + " " + thirdName; 
         }
     }
 }

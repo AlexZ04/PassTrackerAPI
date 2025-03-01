@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using PassTrackerAPI.Constants;
 using PassTrackerAPI.Exceptions;
 
 namespace PassTrackerAPI.Middleware
@@ -23,22 +24,16 @@ namespace PassTrackerAPI.Middleware
             ProblemDetails problemDetails;
 
             if (exception is CustomException custExc)
-            {
-                problemDetails = new ProblemDetails
-                {
-                    Status = custExc.Code,
-                    Title = custExc.Error,
-                    Detail = exception.Message
-                };
-            }
+                problemDetails = BuildDetails(custExc.Code, custExc.Error, exception.Message);
+
+            else if (exception is KeyNotFoundException)
+                problemDetails = BuildDetails(StatusCodes.Status404NotFound, ErrorTitles.KEY_NOT_FOUND);
+
+            else if (exception is UnauthorizedAccessException)
+                problemDetails = BuildDetails(StatusCodes.Status401Unauthorized, ErrorTitles.UNAUTHORIZED);
+
             else
-            {
-                problemDetails = new ProblemDetails
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    Title = "Server error"
-                };
-            }
+                problemDetails = BuildDetails(StatusCodes.Status500InternalServerError, ErrorTitles.SERVER_ERROR);
 
             httpContext.Response.StatusCode = problemDetails.Status.Value;
 
@@ -46,6 +41,20 @@ namespace PassTrackerAPI.Middleware
                 .WriteAsJsonAsync(problemDetails, cancellationToken);
 
             return true;
+        }
+
+        private ProblemDetails BuildDetails(int code, string title, string? detail = null)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = code,
+                Title = title
+            };
+
+            if (detail != null)
+                problemDetails.Detail = detail;
+
+            return problemDetails;
         }
     }
 }

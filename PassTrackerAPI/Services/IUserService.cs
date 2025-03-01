@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PassTrackerAPI.DTO;
+﻿using PassTrackerAPI.DTO;
 using System.Security.Claims;
 
 namespace PassTrackerAPI.Services
@@ -10,5 +9,6 @@ namespace PassTrackerAPI.Services
         public Task<TokenResponseDTO> LoginUser(UserLoginDTO user);
         public Task<UserProfileDTO> GetUserProfileById(Guid id);
         public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user);
+        public Task<List<UserShortDTO>> GetAllUsers();
     }
 }
