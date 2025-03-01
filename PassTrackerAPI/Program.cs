@@ -60,6 +60,7 @@ builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(connecti
 builder.Services.AddTransient<IUserService, UserServiceImpl>();
 builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddTransient<IHasherService, HasherServiceImpl>();
+builder.Services.AddTransient<IRequestService, RequestServiceImpl>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

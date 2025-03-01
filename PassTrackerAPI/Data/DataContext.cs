@@ -9,6 +9,7 @@ namespace PassTrackerAPI.Data
         public DbSet<AdminDb> Admins { get; set; }
         public DbSet<UserRoleDb> UserRoles { get; set; }
         public DbSet<BlacklistTokenDb> BlacklistTokens { get; set; }
+        public DbSet<RequestDB> Requests { get; set; }
 
         public DataContext(DbContextOptions options) : base(options) { }
 
@@ -25,6 +26,9 @@ namespace PassTrackerAPI.Data
 
             modelBuilder.Entity<BlacklistTokenDb>().HasKey(x => x.Token);
             modelBuilder.Entity<BlacklistTokenDb>().ToTable("blacklistTokens");
+
+            modelBuilder.Entity<RequestDB>().HasKey(x => x.Id);
+            modelBuilder.Entity<RequestDB>().ToTable("requests");
 
             base.OnModelCreating(modelBuilder);
         }
