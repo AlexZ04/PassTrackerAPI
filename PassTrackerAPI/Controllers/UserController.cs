@@ -35,7 +35,6 @@ public class UserController : ControllerBase
 
     [HttpPost("logout")]
     [Authorize]
-    [CheckTokenLife]
     public async Task<IActionResult> Logout()
     {
         await _userService.Logout(HttpContext.GetTokenAsync("access_token").Result);
