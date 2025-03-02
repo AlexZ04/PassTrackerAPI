@@ -21,7 +21,7 @@ namespace PassTrackerAPI.Middleware
         {
             _logger.LogError(exception, "Exception occured: {Message}", exception.Message);
 
-            ProblemDetails problemDetails;
+            ProblemDetails problemDetails = new ProblemDetails { Status = 400 };
 
             if (exception is CustomException custExc)
                 problemDetails = BuildDetails(custExc.Code, custExc.Error, exception.Message);
