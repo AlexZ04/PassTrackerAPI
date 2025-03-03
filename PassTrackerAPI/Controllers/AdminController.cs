@@ -61,7 +61,7 @@ namespace PassTrackerAPI.Controllers
         [HttpDelete("user")]
         [Authorize]
         [CheckTokenLife]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser([FromQuery] Guid id)
         {
             await _adminService.DeleteUser(id);
 
