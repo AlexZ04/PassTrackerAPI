@@ -5,6 +5,7 @@ using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using PassTrackerAPI.Repositories;
+using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Xml.Linq;
@@ -149,6 +150,24 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             }
 
             return res;
+        }
+
+        public async Task<RoleResponseDTO> GetUserHighestRole(Guid id)
+        {
+            var user = await _userRepository.GetUserById(id);
+
+            var userRoles = await _context.UserRoles
+                .Where(u => u.User.Equals(user))
+                .Select(u => u.Role)
+                .OrderByDescending(u => (int) u)
+                .ToListAsync();
+
+            if (userRoles.Count() == 0) userRoles.Add(RoleDb.New);
+
+            return new RoleResponseDTO
+            {
+                Role = userRoles[0]
+            };
         }
 
         private async Task CheckEmailIfUsed(string email)

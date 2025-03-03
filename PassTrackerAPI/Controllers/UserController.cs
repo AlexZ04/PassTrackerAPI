@@ -58,4 +58,10 @@ public class UserController : ControllerBase
     {
         return Ok(await _userService.GetProfile(User));
     }
+
+    [HttpGet("highest-role/{id}")]
+    public async Task<IActionResult> GetUserHighestRole(Guid id)
+    {
+        return Ok(await _userService.GetUserHighestRole(id));
+    }
 }
