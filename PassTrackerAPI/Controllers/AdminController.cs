@@ -67,5 +67,15 @@ namespace PassTrackerAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("confirm-user")]
+        [Authorize]
+        [CheckTokenLife]
+        public async Task<IActionResult> ConfirmUser([FromQuery] Guid id)
+        {
+            await _adminService.ConfirmUser(id);
+
+            return NoContent();
+        }
     }
 }

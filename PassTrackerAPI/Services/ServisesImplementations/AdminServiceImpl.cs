@@ -71,6 +71,35 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
+        public async Task ConfirmUser(Guid id)
+        {
+            var user = await _userRepository.GetUserById(id);
+
+            if (!user.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_NOT_NEW);
+
+            var newUserRole = new UserRoleDb
+            {
+                Id = Guid.NewGuid(),
+                Role = RoleDb.Student,
+                User = user
+            };
+
+            var userActualRole = await _context.UserRoles
+                .FirstOrDefaultAsync(u => u.User.Equals(user) && u.Role == RoleDb.New);
+
+            if (userActualRole == null)
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_NOT_NEW);
+
+            _context.UserRoles.Remove(userActualRole);
+            user.Roles.Remove(userActualRole);
+
+            user.Roles.Add(newUserRole);
+            _context.UserRoles.Add(newUserRole);
+
+            await _context.SaveChangesAsync();
+        }
+
         private UserRoleDb BuildUserRoleDb(UserDb user, RoleDb role)
         {
             UserRoleDb newUserRole = new UserRoleDb
