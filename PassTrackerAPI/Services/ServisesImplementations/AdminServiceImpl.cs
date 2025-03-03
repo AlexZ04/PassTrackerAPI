@@ -5,21 +5,26 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Repositories;
 
 namespace PassTrackerAPI.Services.ServisesImplementations
 {
     public class AdminServiceImpl : IAdminService
     {
         private readonly DataContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public AdminServiceImpl(DataContext context)
+        public AdminServiceImpl(
+            DataContext context,
+            IUserRepository userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task GiveUserRole(Guid id, RoleControlDTO role)
         {
-            var user = await GetUser(id);
+            var user = await _userRepository.GetUserById(id);
 
             CheckRole(role);
 
@@ -38,7 +43,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task TakeUserRole(Guid id, RoleControlDTO role)
         {
-            var user = await GetUser(id);
+            var user = await _userRepository.GetUserById(id);
 
             CheckRole(role);
 
@@ -54,16 +59,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-        private async Task<UserDb> GetUser(Guid id)
+        public async Task DeleteUser(Guid id)
         {
-            var user = await _context.Users
-                .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-                throw new KeyNotFoundException();
-
-            return user;
+            var user = await _userRepository.GetUserById(id);
         }
 
         private UserRoleDb BuildUserRoleDb(UserDb user, RoleDb role)

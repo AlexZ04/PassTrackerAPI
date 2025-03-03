@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Middleware;
+using PassTrackerAPI.Repositories;
+using PassTrackerAPI.Repositories.RepositoriesImplementations;
 using PassTrackerAPI.Services;
 using PassTrackerAPI.Services.ServisesImplementations;
 using System.Reflection;
@@ -61,6 +63,7 @@ builder.Services.AddTransient<IUserService, UserServiceImpl>();
 builder.Services.AddTransient<IAdminService, AdminServiceImpl>();
 builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddTransient<IHasherService, HasherServiceImpl>();
+builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

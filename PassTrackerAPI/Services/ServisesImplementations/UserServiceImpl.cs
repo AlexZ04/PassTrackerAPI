@@ -4,6 +4,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Repositories;
 using System.Net;
 using System.Security.Claims;
 using System.Xml.Linq;
@@ -16,12 +17,18 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         private readonly DataContext _context;
         private readonly IHasherService _hasherService;
         private readonly ITokenService _tokenService;
+        private readonly IUserRepository _userRepository;
 
-        public UserServiceImpl(DataContext context, IHasherService hasherService, ITokenService tokenService)
+        public UserServiceImpl(
+            DataContext context,
+            IHasherService hasherService,
+            ITokenService tokenService,
+            IUserRepository userRepository)
         {
             _context = context;
             _hasherService = hasherService;
             _tokenService = tokenService;
+            _userRepository = userRepository;
         }
 
         public async Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user)
@@ -87,12 +94,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task<UserProfileDTO> GetUserProfileById(Guid id)
         {
-            var user = await _context.Users
-                .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-                throw new KeyNotFoundException();
+            var user = await _userRepository.GetUserById(id);
 
             var userInfo = new UserProfileDTO
             {

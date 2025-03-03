@@ -6,5 +6,6 @@ namespace PassTrackerAPI.Services
     {
         public Task GiveUserRole(Guid id, RoleControlDTO role);
         public Task TakeUserRole(Guid id, RoleControlDTO role);
+        public Task DeleteUser(Guid id);
     }
 }
