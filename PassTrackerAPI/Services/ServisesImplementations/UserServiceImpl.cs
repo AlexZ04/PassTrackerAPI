@@ -4,6 +4,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using System.Net;
 using System.Security.Claims;
 using System.Xml.Linq;
 
@@ -116,13 +117,22 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return GetUserProfileById(new Guid(userId));
         }
 
-        // get all not-new (confirmed) users
-        public async Task<List<UserShortDTO>> GetAllUsers()
+        // if newUsersOnly == false then get all not-new users
+        public async Task<List<UserShortDTO>> GetAllUsers(bool newUsersOnly = false)
         {
-            var allUsers = await _context.Users
-                .Include(u => u.Roles)
-                .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
-                .ToListAsync();
+            var allUsersQuerable = _context.Users
+                .Include(u => u.Roles);
+
+            List<UserDb> allUsers;
+            
+            if (newUsersOnly)
+                allUsers = await allUsersQuerable
+                    .Where(u => u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .ToListAsync();
+            else
+                allUsers = await allUsersQuerable
+                    .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .ToListAsync();
 
             List<UserShortDTO> res = new List<UserShortDTO>();
 

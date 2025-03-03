@@ -9,7 +9,7 @@ namespace PassTrackerAPI.Services
         public Task<TokenResponseDTO> LoginUser(UserLoginDTO user);
         public Task<UserProfileDTO> GetUserProfileById(Guid id);
         public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user);
-        public Task<List<UserShortDTO>> GetAllUsers();
+        public Task<List<UserShortDTO>> GetAllUsers(bool newUsersOnly = false);
         public Task Logout(string? token);
     }
 }

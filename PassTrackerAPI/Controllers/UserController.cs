@@ -58,12 +58,4 @@ public class UserController : ControllerBase
     {
         return Ok(await _userService.GetProfile(User));
     }
-
-    [HttpGet("users")]
-    [Authorize]
-    [CheckTokenLife]
-    public async Task<IActionResult> GetAllUsers()
-    {
-        return Ok(await _userService.GetAllUsers());
-    }
 }
