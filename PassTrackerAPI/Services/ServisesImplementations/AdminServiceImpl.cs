@@ -62,6 +62,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         public async Task DeleteUser(Guid id)
         {
             var user = await _userRepository.GetUserById(id);
+
+            _context.Users.Remove(user);
+
+            foreach (var role in user.Roles)
+                _context.UserRoles.Remove(role);
+
+            await _context.SaveChangesAsync();
         }
 
         private UserRoleDb BuildUserRoleDb(UserDb user, RoleDb role)

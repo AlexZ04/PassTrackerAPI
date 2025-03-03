@@ -57,5 +57,15 @@ namespace PassTrackerAPI.Controllers
         {
             return Ok(await _userService.GetAllUsers(true));
         }
+
+        [HttpDelete("user")]
+        [Authorize]
+        [CheckTokenLife]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            await _adminService.DeleteUser(id);
+
+            return NoContent();
+        }
     }
 }
