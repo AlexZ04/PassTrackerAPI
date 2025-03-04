@@ -1,15 +1,16 @@
-﻿namespace PassTrackerAPI.Data.Entities
+﻿using PassTrackerAPI.Data.Entities;
+
+namespace PassTrackerAPI.DTO
 {
-    public class RequestDB
+    public class RequestDTO
     {
         public Guid Id { get; set; }
-        public UserDb User { get; set; }
+        public string UserName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime FinishDate { get; set; }
         public TypeRequestDB TypeRequest { get; set; }
         public StatusRequestDB StatusRequest { get; set; }
         public string? Comment { get; set; }
         public byte[]? Photo { get; set; }
-
     }
 }

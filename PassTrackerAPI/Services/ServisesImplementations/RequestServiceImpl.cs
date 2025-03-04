@@ -1,10 +1,12 @@
 ﻿
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Migrations;
 using System.Security.Claims;
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -38,6 +40,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 FinishDate = request.FinishDate,
                 TypeRequest = request.TypeRequest,
                 StatusRequest = StatusRequestDB.Pending,
+                Comment = null,
                 Photo = request.Photo
             };
 
@@ -49,16 +52,16 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         }
 
 
-        public async Task<string> ChangeRequest(RequestChangeDTO request, ClaimsPrincipal user)
+        public async Task<string> ChangeRequest(Guid requestId, RequestChangeDTO request, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
                 throw new UnauthorizedAccessException();
-            var req = await _context.Requests.FirstOrDefaultAsync(r => r.Id == request.Id);
+            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == requestId);
 
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            //if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
 
             req.StartDate = request.StartDate;
             req.FinishDate = request.FinishDate;
@@ -74,10 +77,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (userId == null)
                 throw new UnauthorizedAccessException();
-            var req = await _context.Requests.FirstOrDefaultAsync(r => r.Id == requestId);
+            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == requestId);
 
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            //if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
 
             if (req.StatusRequest != StatusRequestDB.Accepted)
             {
@@ -89,5 +92,71 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         }
 
+        public async Task<RequestDTO> GetRequestInfo(Guid requestId, ClaimsPrincipal user)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                throw new UnauthorizedAccessException();
+            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(el => el.Id == requestId);
+            
+            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
+            //НУЖНА ПРОВЕРКА НА РОЛЬ 
+            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+
+            var request = new RequestDTO
+            {
+                Id = req.Id,
+                UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
+                StartDate = req.StartDate,
+                FinishDate = req.FinishDate,
+                TypeRequest = req.TypeRequest,
+                StatusRequest =  req.StatusRequest,
+                Comment = req.Comment,
+                Photo = req.Photo
+            };
+
+            return request;
+        }
+
+        public async Task<List<RequestShortDTO>> GetAllRequests(StatusRequestDB? StatusRequestSort)
+        {
+            var requests = await _context.Requests.Include(el => el.User)
+            .Select(o => new RequestShortDTO
+            {
+                Id = o.Id,
+                UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
+                StartDate = o.StartDate,
+                FinishDate = o.FinishDate,
+                TypeRequest = o.TypeRequest,
+                StatusRequest = o.StatusRequest
+
+            }).ToListAsync();
+            if(StatusRequestSort != null)
+            {
+                requests = requests.Where(el => el.StatusRequest == StatusRequestSort).ToList();
+            }
+            return (requests);
+        }
+
+        public async Task<List<RequestShortDTO>> GetAllUserRequests(ClaimsPrincipal user)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                throw new UnauthorizedAccessException();
+            var userRequests = await _context.Requests.Include(el => el.User)
+            .Where(r => r.User.Id == new Guid(userId))
+            .Select(o => new RequestShortDTO
+            {
+                Id = o.Id,
+                UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
+                StartDate = o.StartDate,
+                FinishDate = o.FinishDate,
+                TypeRequest = o.TypeRequest,
+                StatusRequest = o.StatusRequest
+
+            }).ToListAsync();
+            return (userRequests);
+        }
     }
 }
