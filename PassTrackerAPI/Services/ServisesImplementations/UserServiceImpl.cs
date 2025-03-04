@@ -101,6 +101,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             {
                 Name = ConcatName(user.SecondName, user.FirstName, user.MiddleName),
                 Group = user.Group,
+                Email = user.Email,
                 Roles = new List<RoleDb>()
             };
 
@@ -169,6 +170,25 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 Role = userRoles[0]
             };
         }
+
+        public async Task EditUserEmail(Guid id, UserEditEmailDTO email)
+        {
+            var user = await _userRepository.GetUserById(id);
+
+            user.Email = email.Email;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task EditUserPassword(Guid id, UserEditPasswordDTO password)
+        {
+            var user = await _userRepository.GetUserById(id);
+
+            user.Password = _hasherService.HashPassword(password.Password);
+
+            await _context.SaveChangesAsync();
+        }
+
 
         private async Task CheckEmailIfUsed(string email)
         {

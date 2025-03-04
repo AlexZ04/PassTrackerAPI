@@ -6,6 +6,7 @@ namespace PassTrackerAPI.DTO
     {
         public string Name { get; set; }
         public int? Group { get; set; }
+        public string Email { get; set; }
         public List<RoleDb> Roles { get; set; } 
     }
 }

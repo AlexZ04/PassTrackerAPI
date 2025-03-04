@@ -12,5 +12,7 @@ namespace PassTrackerAPI.Services
         public Task<List<UserShortDTO>> GetAllUsers(bool newUsersOnly = false);
         public Task Logout(string? token);
         public Task<RoleResponseDTO> GetUserHighestRole(Guid id);
+        public Task EditUserEmail(Guid id, UserEditEmailDTO email);
+        public Task EditUserPassword(Guid id, UserEditPasswordDTO password);
     }
 }
