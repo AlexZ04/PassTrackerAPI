@@ -35,7 +35,7 @@ namespace PassTrackerAPI.Controllers
         [HttpDelete("deanery")]
         [Authorize]
         [CheckTokenLife]
-        public async Task<IActionResult> DeleteUserDeanery([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
+        public async Task<IActionResult> TakeUserRole([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
             await _adminService.TakeUserRole(id, role);
 
