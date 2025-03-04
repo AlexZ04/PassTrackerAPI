@@ -189,7 +189,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-
+        // private helpful functions
         private async Task CheckEmailIfUsed(string email)
         {
             var foundUserByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
