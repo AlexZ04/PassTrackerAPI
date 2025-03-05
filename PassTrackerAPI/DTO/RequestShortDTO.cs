@@ -10,5 +10,6 @@ namespace PassTrackerAPI.DTO
         public DateTime FinishDate { get; set; }
         public TypeRequestDB TypeRequest { get; set; }
         public StatusRequestDB StatusRequest { get; set; }
+        public int? Group { get; set; }
     }
 }

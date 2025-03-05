@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
@@ -22,7 +23,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
  
 
-        public async Task<string> CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
+        public async Task CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -48,11 +49,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             await _context.SaveChangesAsync();
 
-            return("Request has been created");
         }
 
 
-        public async Task<string> ChangeRequest(Guid requestId, RequestChangeDTO request, ClaimsPrincipal user)
+        public async Task ChangeRequest(Guid requestId, RequestChangeDTO request, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -69,9 +69,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             req.Photo = request.Photo;
             await _context.SaveChangesAsync();
 
-            return ("Request has been changed");
+
         }
-        public async Task<string> DeleteRequest(Guid requestId, ClaimsPrincipal user)
+        public async Task DeleteRequest(Guid requestId, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -86,7 +86,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             {
                 _context.Requests.Remove(req);
                 await _context.SaveChangesAsync();
-                return ("Request has been deleted");
+
             }
             throw new CredentialsException(ErrorTitles.REQUEST_ERROR, ErrorMessages.CANNOT_DELETE_ACCEPTED_REQUEST);
 
@@ -113,13 +113,17 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 TypeRequest = req.TypeRequest,
                 StatusRequest =  req.StatusRequest,
                 Comment = req.Comment,
-                Photo = req.Photo
+                Photo = req.Photo,
+                Group = req.User.Group
             };
 
             return request;
         }
 
-        public async Task<List<RequestShortDTO>> GetAllRequests(StatusRequestDB? StatusRequestSort)
+
+
+        public async Task<RequestsPagedListModel> GetAllRequests(StatusRequestDB? StatusRequestSort, 
+            DateTime? StartDate, DateTime? FinishDate, int? Group, string? Name, int page, int size)
         {
             var requests = await _context.Requests.Include(el => el.User)
             .Select(o => new RequestShortDTO
@@ -129,17 +133,53 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 StartDate = o.StartDate,
                 FinishDate = o.FinishDate,
                 TypeRequest = o.TypeRequest,
-                StatusRequest = o.StatusRequest
+                StatusRequest = o.StatusRequest,
+                Group = o.User.Group
 
             }).ToListAsync();
-            if(StatusRequestSort != null)
+
+            if (StatusRequestSort != null)
             {
                 requests = requests.Where(el => el.StatusRequest == StatusRequestSort).ToList();
             }
-            return (requests);
+
+            if (StartDate != null)
+            {
+                requests = requests.Where(el => el.StartDate >= StartDate).ToList();
+            }
+            if (FinishDate != null)
+            {
+                requests = requests.Where(el => el.FinishDate <= FinishDate).ToList();
+            }
+            if (Group != null)
+            {
+                requests = requests.Where(el => el.Group == Group).ToList();
+            }
+            if(Name != null)
+            {
+                requests = requests.Where(el => el.UserName.ToUpper().Contains(Name.ToUpper())).ToList();
+            }
+            var paged = requests.Skip((page - 1) * size).Take(size).ToList();
+            RequestsPagedListModel response = new RequestsPagedListModel
+            {
+                Requests = paged,
+                Pagination = new PageInfoModel
+                {
+                    size = size,
+                    count = (int)Math.Ceiling((decimal)requests.Count() / size),
+                    current = page
+                }
+
+            };
+
+            return (response);
         }
 
-        public async Task<List<RequestShortDTO>> GetAllUserRequests(ClaimsPrincipal user)
+
+
+
+
+        public async Task<RequestsPagedListModel> GetAllUserRequests(ClaimsPrincipal user, int page, int size)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
@@ -153,10 +193,27 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 StartDate = o.StartDate,
                 FinishDate = o.FinishDate,
                 TypeRequest = o.TypeRequest,
-                StatusRequest = o.StatusRequest
+                StatusRequest = o.StatusRequest,
+                Group = o.User.Group
 
             }).ToListAsync();
-            return (userRequests);
+            
+            var paged = userRequests.Skip((page - 1) * size).Take(size).ToList();
+            RequestsPagedListModel response = new RequestsPagedListModel
+            {
+                Requests = paged,
+                Pagination = new PageInfoModel
+                {
+                    size = size,
+                    count = (int)Math.Ceiling((decimal)userRequests.Count() / size),
+                    current = page
+                }
+
+            };
+
+            return (response);
         }
+
+ 
     }
 }
