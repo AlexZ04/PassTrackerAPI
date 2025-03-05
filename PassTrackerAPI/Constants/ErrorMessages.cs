@@ -9,5 +9,6 @@
         public const string INCORRECT_ROLE = "Incorrect role!";
         public const string USER_NOT_NEW = "This user is already in system!";
         public const string ONLY_FOR_ADMINS = "Only admins can do that!";
+        public const string USER_IS_NOT_CONFIRMED = "This user is not confirmed";
     }
 }

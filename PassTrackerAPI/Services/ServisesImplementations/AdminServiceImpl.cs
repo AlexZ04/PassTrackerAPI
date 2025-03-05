@@ -33,6 +33,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (user.Roles.Select(u => u.Role).Contains(roleFromDb))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_ALREADY_HAVE_THIS_ROLE);
 
+            if (user.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_CONFIRMED);
+
             var newUserRole = BuildUserRoleDb(user, roleFromDb);
 
             user.Roles.Add(newUserRole);
