@@ -22,28 +22,28 @@ namespace PassTrackerAPI.Controllers
             _requestService = requestService;
         }
 
-        [HttpPost("CreateRequest"), Authorize, CheckTokenLife]
+        [HttpPost("create-request"), Authorize, CheckTokenLife]
         public async Task<IActionResult> CreateReq( RequestCreateDTO request)
         {
             await _requestService.CreateRequest(request, User);
             return Ok();
         }
 
-        [HttpPut("ChangeRequest/{id}"), Authorize, CheckTokenLife]
+        [HttpPut("change-request/{id}"), Authorize, CheckTokenLife]
         public async Task<IActionResult> ChangeReq([FromRoute] Guid id,  RequestChangeDTO request) 
         {
             await _requestService.ChangeRequest(id, request, User);
             return Ok();
         }
 
-        [HttpDelete("DeleteRequest/{id}"), Authorize, CheckTokenLife]
+        [HttpDelete("delete-request/{id}"), Authorize, CheckTokenLife]
         public async Task<IActionResult> DeleteReq([FromRoute] Guid id)
         {
             await _requestService.DeleteRequest(id, User);
             return Ok();
         }
 
-        [HttpGet("GetRequestInfo/{id}"), Authorize, CheckTokenLife]
+        [HttpGet("get-requestInfo/{id}"), Authorize, CheckTokenLife]
         public async Task<IActionResult> GetReqtInfo([FromRoute] Guid id)
         {
             return Ok(await _requestService.GetRequestInfo(id, User));
@@ -51,7 +51,7 @@ namespace PassTrackerAPI.Controllers
 
 
         //Фильтрация осуществляется по дате начала пропуска, по дате конца, по группе, по фио студента
-        [HttpGet("GetAllRequests"), Authorize, CheckTokenLife]
+        [HttpGet("get-all-requests"), Authorize, CheckTokenLife]
         public async Task<IActionResult> GetAllReqs([FromQuery] StatusRequestDB? StatusRequestSort,
             [FromQuery] DateTime? StartDate , [FromQuery] DateTime? FinishDate, [FromQuery] int? Group, 
             [FromQuery] string? Name, [FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
@@ -59,7 +59,7 @@ namespace PassTrackerAPI.Controllers
             return Ok(await _requestService.GetAllRequests(StatusRequestSort , StartDate, FinishDate, Group,  Name,  page,  size));
         }
 
-        [HttpGet("GetAllUserRequests"), Authorize, CheckTokenLife]
+        [HttpGet("get-all-user-requests"), Authorize, CheckTokenLife]
         public async Task<IActionResult> GetAllUserReqs([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _requestService.GetAllUserRequests( User, page , size));
