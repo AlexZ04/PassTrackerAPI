@@ -65,6 +65,7 @@ builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddTransient<IHasherService, HasherServiceImpl>();
 builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 builder.Services.AddTransient<IRequestService, RequestServiceImpl>();
+builder.Services.AddTransient<IDeaneryService, DeaneryServiceImpl>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

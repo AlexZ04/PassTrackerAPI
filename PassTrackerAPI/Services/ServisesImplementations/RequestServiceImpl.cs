@@ -107,28 +107,28 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             bool isUserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
 
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            //НУЖНА ПРОВЕРКА НА РОЛЬ 
+ 
             if(userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Deanery) ||
-                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAmin ) 
+                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAmin || req.User.Id == new Guid(userId)) 
             {
+                var request = new RequestDTO
+                {
+                    Id = req.Id,
+                    UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
+                    StartDate = req.StartDate,
+                    FinishDate = req.FinishDate,
+                    TypeRequest = req.TypeRequest,
+                    StatusRequest = req.StatusRequest,
+                    Comment = req.Comment,
+                    Photo = req.Photo,
+                    Group = req.User.Group
+                };
 
+                return request;
             }
-            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+            throw new UnauthorizedAccessException(); 
 
-            var request = new RequestDTO
-            {
-                Id = req.Id,
-                UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
-                StartDate = req.StartDate,
-                FinishDate = req.FinishDate,
-                TypeRequest = req.TypeRequest,
-                StatusRequest =  req.StatusRequest,
-                Comment = req.Comment,
-                Photo = req.Photo,
-                Group = req.User.Group
-            };
 
-            return request;
         }
 
 

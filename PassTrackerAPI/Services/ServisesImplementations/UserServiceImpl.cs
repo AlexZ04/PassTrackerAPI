@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Migrations;
 using PassTrackerAPI.Repositories;
 using System.Linq;
 using System.Net;
@@ -122,7 +124,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         }
 
         // if newUsersOnly == false then get all not-new users
-        public async Task<List<UserShortDTO>> GetAllUsers(bool newUsersOnly = false)
+        public async Task<UsersPagedListModel> GetAllUsers(int page, int size, bool newUsersOnly = false)
         {
             var allUsersQuerable = _context.Users
                 .Include(u => u.Roles);
@@ -137,7 +139,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 allUsers = await allUsersQuerable
                     .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
                     .ToListAsync();
-
             List<UserShortDTO> res = new List<UserShortDTO>();
 
             foreach (var user in allUsers)
@@ -150,7 +151,21 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 });
             }
 
-            return res;
+            var paged = res.Skip((page - 1) * size).Take(size).ToList();
+            UsersPagedListModel response = new UsersPagedListModel
+            {
+                Requests = paged,
+                Pagination = new PageInfoModel
+                {
+                    size = size,
+                    count = (int)Math.Ceiling((decimal)res.Count() / size),
+                    current = page
+                }
+
+            };
+
+            return (response);
+
         }
 
         public async Task<RoleResponseDTO> GetUserHighestRole(Guid id)
