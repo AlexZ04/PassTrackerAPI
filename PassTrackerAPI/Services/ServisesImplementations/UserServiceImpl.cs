@@ -68,19 +68,21 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
-            string token = _tokenService.CreateAccessTokenById(newUser.Id);
+            string token = _tokenService.CreateAccessTokenById(newUser.Id, GetUserRoles(newUser));
 
             return new TokenResponseDTO(token, refreshToken.Token);
         }
 
         public async Task<TokenResponseDTO> LoginUser(UserLoginDTO user)
         {
-            var foundUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+            var foundUser = await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Email == user.Email);
 
             if (foundUser == null || !_hasherService.CheckPassword(foundUser.Password, user.Password))
                 throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.INVALID_CREDENTIALS);
 
-            string token = _tokenService.CreateAccessTokenById(foundUser.Id);
+            string token = _tokenService.CreateAccessTokenById(foundUser.Id, GetUserRoles(foundUser));
 
             var refreshToken = new RefreshTokenDb
             {
@@ -102,12 +104,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             var refreshToken = await _context.RefreshTokens
                 .Include(r => r.User)
+                .ThenInclude(u => u.Roles)
                 .FirstOrDefaultAsync(r => r.Token == token.RefreshToken);
 
             if (refreshToken == null || refreshToken.Expires < DateTime.Now)
                 throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.REFRESH_TOKEN_IS_NOT_VALID);
 
-            string accessToken = _tokenService.CreateAccessTokenById(refreshToken.User.Id);
+            string accessToken = _tokenService.CreateAccessTokenById(refreshToken.User.Id, GetUserRoles(refreshToken.User));
 
             refreshToken.Token = _tokenService.GenerateRefreshToken();
             refreshToken.Expires = DateTime.Now.AddDays(GeneralSettings.REFRESH_TOKEN_LIFE).ToUniversalTime();
@@ -247,6 +250,38 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         private string ConcatName(string secondName, string firstName, string thirdName)
         {
             return secondName + " " + firstName + " " + thirdName; 
+        }
+
+        private List<string> GetUserRoles(UserDb user)
+        {
+            List<string> roles = new List<string>();
+
+            foreach (var role in user.Roles)
+            {
+                switch (role.Role)
+                {
+                    case RoleDb.New:
+                        roles.Add("New");
+                        break;
+
+                    case RoleDb.Student:
+                        roles.Add("Student");
+                        break;
+
+                    case RoleDb.Teacher:
+                        roles.Add("Teacher");
+                        break;
+
+                    case RoleDb.Deanery:
+                        roles.Add("Deanery");
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            return roles;
         }
     }
 }

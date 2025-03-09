@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
+using PassTrackerAPI.Data.Entities;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -20,15 +22,19 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context = context;
         }
 
-        public string CreateAccessTokenById(Guid id)
+        public string CreateAccessTokenById(Guid id, List<string> roles)
         {
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
+            ClaimsIdentity claims = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-                }),
+                });
 
+            foreach (var role in roles)
+                claims.AddClaim(new Claim(ClaimTypes.Role, role));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = claims,
                 Issuer = AuthOptions.ISSUER,
                 Audience = AuthOptions.AUDIENCE,
                 Expires = DateTime.UtcNow.AddMinutes(AuthOptions.LIFETIME_MINUTES),
