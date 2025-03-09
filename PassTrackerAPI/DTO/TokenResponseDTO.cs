@@ -2,11 +2,13 @@
 {
     public class TokenResponseDTO
     {
-        public string Token { get; set; }
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
 
-        public TokenResponseDTO(string token)
+        public TokenResponseDTO(string accessToken, string refreshToken)
         {
-            Token = token;
+            AccessToken = accessToken;
+            RefreshToken = refreshToken;
         }
     }
 }

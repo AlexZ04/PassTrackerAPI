@@ -12,5 +12,6 @@
         public const string USER_IS_NOT_CONFIRMED = "This user is not confirmed";
         public const string CANNOT_DELETE_ACCEPTED_REQUEST = "You can not delete accepted request!";
         public const string NOT_EXISTING_REQUEST = "There is no such request!";
+        public const string REFRESH_TOKEN_IS_NOT_VALID = "Refresh token is not valid!";
     }
 }

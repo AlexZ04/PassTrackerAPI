@@ -7,6 +7,7 @@ namespace PassTrackerAPI.Services
     {
         public Task<TokenResponseDTO> RegisterUser(UserRegisterDTO user);
         public Task<TokenResponseDTO> LoginUser(UserLoginDTO user);
+        public Task<TokenResponseDTO> LoginWithRefreshToken(RefreshTokenDTO token);
         public Task<UserProfileDTO> GetUserProfileById(Guid id);
         public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user);
         public Task<List<UserShortDTO>> GetAllUsers(bool newUsersOnly = false);

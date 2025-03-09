@@ -5,10 +5,7 @@ using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using PassTrackerAPI.Repositories;
-using System.Linq;
-using System.Net;
 using System.Security.Claims;
-using System.Xml.Linq;
 
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -60,11 +57,20 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context.UserRoles.Add(newRole);
             _context.Users.Add(newUser);
 
+            var refreshToken = new RefreshTokenDb
+            {
+                Id = Guid.NewGuid(),
+                User = newUser,
+                Token = _tokenService.GenerateRefreshToken(),
+                Expires = DateTime.Now.AddDays(GeneralSettings.REFRESH_TOKEN_LIFE).ToUniversalTime()
+            };
+
+            _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
             string token = _tokenService.CreateAccessTokenById(newUser.Id);
 
-            return new TokenResponseDTO(token);
+            return new TokenResponseDTO(token, refreshToken.Token);
         }
 
         public async Task<TokenResponseDTO> LoginUser(UserLoginDTO user)
@@ -76,7 +82,39 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             string token = _tokenService.CreateAccessTokenById(foundUser.Id);
 
-            return new TokenResponseDTO(token);
+            var refreshToken = new RefreshTokenDb
+            {
+                Id = Guid.NewGuid(),
+                User = foundUser,
+                Token = _tokenService.GenerateRefreshToken(),
+                Expires = DateTime.Now.AddDays(GeneralSettings.REFRESH_TOKEN_LIFE).ToUniversalTime()
+            };
+
+            await _tokenService.HandleTokens(foundUser.Id, refreshToken.Id);
+
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
+            return new TokenResponseDTO(token, refreshToken.Token);
+        }
+
+        public async Task<TokenResponseDTO> LoginWithRefreshToken(RefreshTokenDTO token)
+        {
+            var refreshToken = await _context.RefreshTokens
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Token == token.RefreshToken);
+
+            if (refreshToken == null || refreshToken.Expires < DateTime.Now)
+                throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.REFRESH_TOKEN_IS_NOT_VALID);
+
+            string accessToken = _tokenService.CreateAccessTokenById(refreshToken.User.Id);
+
+            refreshToken.Token = _tokenService.GenerateRefreshToken();
+            refreshToken.Expires = DateTime.Now.AddDays(GeneralSettings.REFRESH_TOKEN_LIFE).ToUniversalTime();
+
+            await _context.SaveChangesAsync();
+
+            return new TokenResponseDTO(accessToken, refreshToken.Token);
         }
 
         public async Task Logout(string? token)
@@ -88,6 +126,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 Token = token,
                 AddTime = DateTime.Now.ToUniversalTime(),
             };
+
+            
 
             _context.BlacklistTokens.Add(blacklistToken);
             await _context.SaveChangesAsync();

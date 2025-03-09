@@ -33,6 +33,12 @@ public class UserController : ControllerBase
         return Ok(await _userService.LoginUser(user));
     }
 
+    [HttpPost("login-refresh")]
+    public async Task<IActionResult> LoginWithRefreshToken([FromBody, Required] RefreshTokenDTO token)
+    {
+        return Ok(await _userService.LoginWithRefreshToken(token));
+    }
+
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()
