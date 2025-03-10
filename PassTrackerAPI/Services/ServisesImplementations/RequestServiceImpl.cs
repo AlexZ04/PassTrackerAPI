@@ -21,7 +21,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context = context;
         }
 
- 
+
 
         public async Task CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
         {
@@ -30,9 +30,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var userProfile = await _context.Users
+            var userProfile = await _context.Users.Include(u => u.Roles)
              .FirstOrDefaultAsync(u => u.Id == new Guid(userId));
-
+            if (!userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Student)) 
+            {
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_STUDENT);
+            }
             RequestDB newRequest = new RequestDB
             {
                 Id = Guid.NewGuid(),
@@ -99,25 +102,33 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
             var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(el => el.Id == requestId);
-            
+            var userProfile = await _context.Users.Include(u => u.Roles)
+             .FirstOrDefaultAsync(u => u.Id == new Guid(userId));
+            bool isUserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
+
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            //НУЖНА ПРОВЕРКА НА РОЛЬ 
-            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
-
-            var request = new RequestDTO
+ 
+            if(userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Deanery) ||
+                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAmin || req.User.Id == new Guid(userId)) 
             {
-                Id = req.Id,
-                UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
-                StartDate = req.StartDate,
-                FinishDate = req.FinishDate,
-                TypeRequest = req.TypeRequest,
-                StatusRequest =  req.StatusRequest,
-                Comment = req.Comment,
-                Photo = req.Photo,
-                Group = req.User.Group
-            };
+                var request = new RequestDTO
+                {
+                    Id = req.Id,
+                    UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
+                    StartDate = req.StartDate,
+                    FinishDate = req.FinishDate,
+                    TypeRequest = req.TypeRequest,
+                    StatusRequest = req.StatusRequest,
+                    Comment = req.Comment,
+                    Photo = req.Photo,
+                    Group = req.User.Group
+                };
 
-            return request;
+                return request;
+            }
+            throw new UnauthorizedAccessException(); 
+
+
         }
 
 
