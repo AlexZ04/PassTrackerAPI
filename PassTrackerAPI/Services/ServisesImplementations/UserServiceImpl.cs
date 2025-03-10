@@ -70,7 +70,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
-            string token = _tokenService.CreateAccessTokenById(newUser.Id, GetUserRoles(newUser));
+            string token = _tokenService.CreateAccessTokenById(newUser.Id, await GetUserRoles(newUser));
 
             return new TokenResponseDTO(token, refreshToken.Token);
         }
@@ -84,7 +84,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (foundUser == null || !_hasherService.CheckPassword(foundUser.Password, user.Password))
                 throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.INVALID_CREDENTIALS);
 
-            string token = _tokenService.CreateAccessTokenById(foundUser.Id, GetUserRoles(foundUser));
+            string token = _tokenService.CreateAccessTokenById(foundUser.Id, await GetUserRoles(foundUser));
 
             var refreshToken = new RefreshTokenDb
             {
@@ -112,7 +112,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (refreshToken == null || refreshToken.Expires < DateTime.Now)
                 throw new CredentialsException(ErrorTitles.CREDENTIALS, ErrorMessages.REFRESH_TOKEN_IS_NOT_VALID);
 
-            string accessToken = _tokenService.CreateAccessTokenById(refreshToken.User.Id, GetUserRoles(refreshToken.User));
+            string accessToken = _tokenService.CreateAccessTokenById(refreshToken.User.Id, await GetUserRoles(refreshToken.User));
 
             refreshToken.Token = _tokenService.GenerateRefreshToken();
             refreshToken.Expires = DateTime.Now.AddDays(GeneralSettings.REFRESH_TOKEN_LIFE).ToUniversalTime();
@@ -267,7 +267,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return secondName + " " + firstName + " " + thirdName; 
         }
 
-        private List<string> GetUserRoles(UserDb user)
+        private async Task<List<string>> GetUserRoles(UserDb user)
         {
             List<string> roles = new List<string>();
 
@@ -295,6 +295,11 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                         break;
                 }
             }
+
+            var userAdmin = await _context.Admins.FindAsync(user.Id);
+
+            if (userAdmin != null)
+                roles.Add("Admin");
 
             return roles;
         }

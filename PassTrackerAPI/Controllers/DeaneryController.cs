@@ -19,24 +19,23 @@ namespace PassTrackerAPI.Controllers
         }
         
         
-        [HttpPost("accept-request/{id}"), Authorize, CheckTokenLife, AdminOrDeanery]
+        [HttpPost("accept-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> AcceptReq([FromRoute] Guid id)
         {
             await _deaneryService.AcceptRequest(id);
             return Ok();
         }
         
-        [HttpPost("decline-request/{id}"), Authorize, CheckTokenLife, AdminOrDeanery]
+        [HttpPost("decline-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> DeclineReq([FromRoute] Guid id, CommentToDeclinedRequest comment)
         {
             await _deaneryService.DeclineRequest(id, comment);
             return Ok();
         }
 
-        [HttpGet("download-requests"), Authorize, CheckTokenLife] //AdminOrDeanery
+        [HttpGet("download-requests"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> DownloadReqs()
         {
-
             return File(
             await _deaneryService.DownloadRequest(true),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 

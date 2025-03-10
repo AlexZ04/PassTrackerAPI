@@ -24,9 +24,8 @@ namespace PassTrackerAPI.Controllers
         }
 
         [HttpPost("deanery")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> GiveUserRole([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
             await _adminService.GiveUserRole(id, role);
@@ -35,9 +34,8 @@ namespace PassTrackerAPI.Controllers
         }
 
         [HttpDelete("deanery")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> TakeUserRole([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
             await _adminService.TakeUserRole(id, role);
@@ -46,27 +44,24 @@ namespace PassTrackerAPI.Controllers
         }
 
         [HttpGet("users")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> GetAllUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _userService.GetAllUsers(page, size));
         }
 
         [HttpGet("unconfirmed")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> GetAllNewUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _userService.GetAllUsers(page, size, true));
         }
 
         [HttpDelete("user")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> DeleteUser([FromQuery] Guid id)
         {
             await _adminService.DeleteUser(id);
@@ -75,9 +70,8 @@ namespace PassTrackerAPI.Controllers
         }
 
         [HttpPost("confirm-user")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [CheckTokenLife]
-        [Admin]
         public async Task<IActionResult> ConfirmUser([FromQuery] Guid id)
         {
             await _adminService.ConfirmUser(id);
