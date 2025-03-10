@@ -59,7 +59,6 @@ public class UserController : ControllerBase
     [HttpGet("profile")]
     [Authorize]
     [CheckTokenLife]
-    [Admin]
     public async Task<IActionResult> GetProfile()
     {
         return Ok(await _userService.GetProfile(User));

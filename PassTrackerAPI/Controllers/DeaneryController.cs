@@ -9,11 +9,11 @@ namespace PassTrackerAPI.Controllers
 {
     [ApiController]
     [Route("deanery")]
-    public class DeaneryContoller : ControllerBase
+    public class DeaneryController : ControllerBase
     {
         private readonly IDeaneryService _deaneryService;
 
-        public DeaneryContoller(IDeaneryService deaneryService)
+        public DeaneryController(IDeaneryService deaneryService)
         {
             _deaneryService = deaneryService;
         }
