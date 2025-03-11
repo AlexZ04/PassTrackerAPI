@@ -46,7 +46,8 @@ namespace PassTrackerAPI.Controllers
         [HttpGet("users")]
         [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        public async Task<IActionResult> GetAllUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
+        public async Task<IActionResult> GetAllUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, 
+            [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _userService.GetAllUsers(page, size));
         }
@@ -54,7 +55,8 @@ namespace PassTrackerAPI.Controllers
         [HttpGet("unconfirmed")]
         [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        public async Task<IActionResult> GetAllNewUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
+        public async Task<IActionResult> GetAllNewUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, 
+            [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _userService.GetAllUsers(page, size, true));
         }

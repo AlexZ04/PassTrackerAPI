@@ -229,20 +229,30 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             };
         }
 
-        public async Task EditUserEmail(Guid id, UserEditEmailDTO email)
+        public async Task EditUserEmail(ClaimsPrincipal user, UserEditEmailDTO email)
         {
-            var user = await _userRepository.GetUserById(id);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            user.Email = email.Email;
+            if (userId == null)
+                throw new UnauthorizedAccessException();
+
+            var foundUser = await _userRepository.GetUserById(new Guid(userId));
+
+            foundUser.Email = email.Email;
 
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditUserPassword(Guid id, UserEditPasswordDTO password)
+        public async Task EditUserPassword(ClaimsPrincipal user, UserEditPasswordDTO password)
         {
-            var user = await _userRepository.GetUserById(id);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            user.Password = _hasherService.HashPassword(password.Password);
+            if (userId == null)
+                throw new UnauthorizedAccessException();
+
+            var foundUser = await _userRepository.GetUserById(new Guid(userId));
+
+            foundUser.Password = _hasherService.HashPassword(password.Password);
 
             await _context.SaveChangesAsync();
         }

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication;
 using PassTrackerAPI.Data.Entities;
 
 
-
 namespace PassTrackerAPI.Controllers
 {
     [ApiController]
@@ -50,16 +49,23 @@ namespace PassTrackerAPI.Controllers
         }
 
 
-        [HttpGet("get-all-requests"), Authorize, CheckTokenLife, AdminOrDeanery]
-        public async Task<IActionResult> GetAllReqs([FromQuery] StatusRequestDB? StatusRequestSort,
-            [FromQuery] DateTime? StartDate , [FromQuery] DateTime? FinishDate, [FromQuery] int? Group, 
-            [FromQuery] string? Name, [FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
+        [HttpGet("get-all-requests"), Authorize(Roles = "Admin,Deanery,Teacher"), CheckTokenLife]
+        public async Task<IActionResult> GetAllReqs(
+            [FromQuery] StatusRequestDB? StatusRequestSort,
+            [FromQuery] DateTime? StartDate, 
+            [FromQuery] DateTime? FinishDate, 
+            [FromQuery] int? Group, 
+            [FromQuery] string? Name, 
+            [FromQuery, Range(1, int.MaxValue)] int page = 1, 
+            [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _requestService.GetAllRequests(StatusRequestSort , StartDate, FinishDate, Group,  Name,  page,  size));
         }
 
         [HttpGet("get-all-user-requests"), Authorize, CheckTokenLife]
-        public async Task<IActionResult> GetAllUserReqs([FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, int.MaxValue)] int size = 5)
+        public async Task<IActionResult> GetAllUserReqs(
+            [FromQuery, Range(1, int.MaxValue)] int page = 1, 
+            [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
             return Ok(await _requestService.GetAllUserRequests( User, page , size));
         }

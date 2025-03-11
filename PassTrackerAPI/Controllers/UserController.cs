@@ -73,9 +73,9 @@ public class UserController : ControllerBase
     [HttpPatch("edit/email")]
     [Authorize]
     [CheckTokenLife]
-    public async Task<IActionResult> EditUserEmail([FromQuery] Guid id, [FromBody] UserEditEmailDTO email)
+    public async Task<IActionResult> EditUserEmail([FromBody] UserEditEmailDTO email)
     {
-        await _userService.EditUserEmail(id, email);
+        await _userService.EditUserEmail(User, email);
 
         return NoContent();
     }
@@ -83,9 +83,9 @@ public class UserController : ControllerBase
     [HttpPatch("edit/password")]
     [Authorize]
     [CheckTokenLife]
-    public async Task<IActionResult> EditUserPassword([FromQuery] Guid id, [FromBody] UserEditPasswordDTO password)
+    public async Task<IActionResult> EditUserPassword([FromBody] UserEditPasswordDTO password)
     {
-        await _userService.EditUserPassword(id, password);
+        await _userService.EditUserPassword(User, password);
 
         return NoContent();
     }
