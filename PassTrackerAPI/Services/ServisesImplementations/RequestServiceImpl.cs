@@ -1,13 +1,11 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using PassTrackerAPI.Migrations;
+using PassTrackerAPI.Repositories.RepositoriesImplementations;
 using System.Security.Claims;
 
 namespace PassTrackerAPI.Services.ServisesImplementations
@@ -15,12 +13,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     public class RequestServiceImpl : IRequestService
     {
         private readonly DataContext _context;
+        private readonly UserRepositoryImpl _userRepository;
 
-        public RequestServiceImpl(DataContext context)
+        public RequestServiceImpl(DataContext context, UserRepositoryImpl userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
-
 
 
         public async Task CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
@@ -30,12 +29,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var userProfile = await _context.Users.Include(u => u.Roles)
-             .FirstOrDefaultAsync(u => u.Id == new Guid(userId));
-            if (!userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Student)) 
+            var userProfile = await _userRepository.GetUserById(new Guid(userId));
+
+            if (userProfile == null || !userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Student)) 
             {
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_STUDENT);
             }
+
             RequestDB newRequest = new RequestDB
             {
                 Id = Guid.NewGuid(),
@@ -54,7 +54,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         }
 
-
         public async Task ChangeRequest(Guid requestId, RequestChangeDTO request, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -70,10 +69,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             req.FinishDate = request.FinishDate;
             req.TypeRequest = request.TypeRequest;
             req.Photo = request.Photo;
+
             await _context.SaveChangesAsync();
-
-
         }
+
         public async Task DeleteRequest(Guid requestId, ClaimsPrincipal user)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -82,17 +81,17 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 throw new UnauthorizedAccessException();
             var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+            if (req == null) throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+            if (req.User.Id != new Guid(userId)) throw new UnauthorizedAccessException();
 
             if (req.StatusRequest != StatusRequestDB.Accepted)
             {
                 _context.Requests.Remove(req);
                 await _context.SaveChangesAsync();
-
+                return;
             }
-            throw new CredentialsException(ErrorTitles.REQUEST_ERROR, ErrorMessages.CANNOT_DELETE_ACCEPTED_REQUEST);
 
+            throw new CredentialsException(ErrorTitles.REQUEST_ERROR, ErrorMessages.CANNOT_DELETE_ACCEPTED_REQUEST);
         }
 
         public async Task<RequestDTO> GetRequestInfo(Guid requestId, ClaimsPrincipal user)
@@ -101,9 +100,11 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (userId == null)
                 throw new UnauthorizedAccessException();
+
             var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(el => el.Id == requestId);
-            var userProfile = await _context.Users.Include(u => u.Roles)
-             .FirstOrDefaultAsync(u => u.Id == new Guid(userId));
+
+            var userProfile = await _userRepository.GetUserById(new Guid(userId));
+
             bool isUserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
 
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
@@ -126,12 +127,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
                 return request;
             }
+
             throw new UnauthorizedAccessException(); 
-
-
         }
-
-
 
         public async Task<RequestsPagedListModel> GetAllRequests(StatusRequestDB? StatusRequestSort, 
             DateTime? StartDate, DateTime? FinishDate, int? Group, string? Name, int page, int size)
@@ -150,26 +148,20 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             }).ToListAsync();
 
             if (StatusRequestSort != null)
-            {
                 requests = requests.Where(el => el.StatusRequest == StatusRequestSort).ToList();
-            }
 
             if (StartDate != null)
-            {
                 requests = requests.Where(el => el.StartDate >= StartDate).ToList();
-            }
+
             if (FinishDate != null)
-            {
                 requests = requests.Where(el => el.FinishDate <= FinishDate).ToList();
-            }
+
             if (Group != null)
-            {
                 requests = requests.Where(el => el.Group == Group).ToList();
-            }
+
             if(Name != null)
-            {
                 requests = requests.Where(el => el.UserName.ToUpper().Contains(Name.ToUpper())).ToList();
-            }
+
             var paged = requests.Skip((page - 1) * size).Take(size).ToList();
             RequestsPagedListModel response = new RequestsPagedListModel
             {
@@ -183,33 +175,38 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             };
 
-            return (response);
+            return response;
         }
-
-
-
-
 
         public async Task<RequestsPagedListModel> GetAllUserRequests(ClaimsPrincipal user, int page, int size)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (userId == null)
                 throw new UnauthorizedAccessException();
-            var userRequests = await _context.Requests.Include(el => el.User)
-            .Where(r => r.User.Id == new Guid(userId))
-            .Select(o => new RequestShortDTO
-            {
-                Id = o.Id,
-                UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
-                StartDate = o.StartDate,
-                FinishDate = o.FinishDate,
-                TypeRequest = o.TypeRequest,
-                StatusRequest = o.StatusRequest,
-                Group = o.User.Group
 
-            }).ToListAsync();
-            
+            return await GetAllUsersRequestById(new Guid(userId), page, size);
+        }
+
+        public async Task<RequestsPagedListModel> GetAllUsersRequestById(Guid id, int page, int size)
+        {
+            var userRequests = await _context.Requests
+                .Include(el => el.User)
+                .Where(r => r.User.Id == id)
+                .Select(o => new RequestShortDTO
+                {
+                    Id = o.Id,
+                    UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
+                    StartDate = o.StartDate,
+                    FinishDate = o.FinishDate,
+                    TypeRequest = o.TypeRequest,
+                    StatusRequest = o.StatusRequest,
+                    Group = o.User.Group
+
+                }).ToListAsync();
+
             var paged = userRequests.Skip((page - 1) * size).Take(size).ToList();
+
             RequestsPagedListModel response = new RequestsPagedListModel
             {
                 Requests = paged,
@@ -222,9 +219,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             };
 
-            return (response);
+            return response;
         }
-
  
     }
 }

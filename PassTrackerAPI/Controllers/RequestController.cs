@@ -22,28 +22,28 @@ namespace PassTrackerAPI.Controllers
         }
 
         [HttpPost("create-request"), Authorize, CheckTokenLife]
-        public async Task<IActionResult> CreateReq( RequestCreateDTO request)
+        public async Task<IActionResult> CreateReq(RequestCreateDTO request)
         {
             await _requestService.CreateRequest(request, User);
             return Ok();
         }
 
         [HttpPut("change-request/{id}"), Authorize, CheckTokenLife]
-        public async Task<IActionResult> ChangeReq([FromRoute] Guid id,  RequestChangeDTO request) 
+        public async Task<IActionResult> ChangeReq([FromRoute, Required] Guid id,  RequestChangeDTO request) 
         {
             await _requestService.ChangeRequest(id, request, User);
             return Ok();
         }
 
         [HttpDelete("delete-request/{id}"), Authorize, CheckTokenLife]
-        public async Task<IActionResult> DeleteReq([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteReq([FromRoute, Required] Guid id)
         {
             await _requestService.DeleteRequest(id, User);
             return Ok();
         }
 
         [HttpGet("get-requestInfo/{id}"), Authorize, CheckTokenLife]
-        public async Task<IActionResult> GetReqtInfo([FromRoute] Guid id)
+        public async Task<IActionResult> GetReqtInfo([FromRoute, Required] Guid id)
         {
             return Ok(await _requestService.GetRequestInfo(id, User));
         }
@@ -59,7 +59,7 @@ namespace PassTrackerAPI.Controllers
             [FromQuery, Range(1, int.MaxValue)] int page = 1, 
             [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
-            return Ok(await _requestService.GetAllRequests(StatusRequestSort , StartDate, FinishDate, Group,  Name,  page,  size));
+            return Ok(await _requestService.GetAllRequests(StatusRequestSort, StartDate, FinishDate, Group, Name, page, size));
         }
 
         [HttpGet("get-all-user-requests"), Authorize, CheckTokenLife]
@@ -67,7 +67,15 @@ namespace PassTrackerAPI.Controllers
             [FromQuery, Range(1, int.MaxValue)] int page = 1, 
             [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
-            return Ok(await _requestService.GetAllUserRequests( User, page , size));
+            return Ok(await _requestService.GetAllUserRequests(User, page, size));
+        }
+
+        [HttpGet("get-all-user-requests/{id}"), Authorize(Roles = "Admin,Deanery,Teacher"), CheckTokenLife]
+        public async Task<IActionResult> GetAllUsersReqsById([FromRoute, Required] Guid id,
+            [FromQuery, Range(1, int.MaxValue)] int page = 1,
+            [FromQuery, Range(1, int.MaxValue)] int size = 5)
+        {
+            return Ok(await _requestService.GetAllUsersRequestById(id, page, size));
         }
     }
 }

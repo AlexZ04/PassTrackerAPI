@@ -15,5 +15,6 @@ namespace PassTrackerAPI.Services
             DateTime? StartDate, DateTime? FinishDate, int? Group, string? Name, int page , int size);
         
         public Task<RequestsPagedListModel> GetAllUserRequests(ClaimsPrincipal user, int page, int size);
+        public Task<RequestsPagedListModel> GetAllUsersRequestById(Guid id, int page, int size);
     }
 }
