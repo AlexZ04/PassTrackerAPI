@@ -5,6 +5,7 @@ using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using PassTrackerAPI.Migrations;
+using PassTrackerAPI.Repositories;
 using PassTrackerAPI.Repositories.RepositoriesImplementations;
 using System.Security.Claims;
 
@@ -13,9 +14,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     public class RequestServiceImpl : IRequestService
     {
         private readonly DataContext _context;
-        private readonly UserRepositoryImpl _userRepository;
+        private readonly IUserRepository _userRepository;
 
-        public RequestServiceImpl(DataContext context, UserRepositoryImpl userRepository)
+        public RequestServiceImpl(DataContext context, IUserRepository userRepository)
         {
             _context = context;
             _userRepository = userRepository;
