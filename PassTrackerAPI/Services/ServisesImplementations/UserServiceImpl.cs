@@ -122,9 +122,14 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return new TokenResponseDTO(accessToken, refreshToken.Token);
         }
 
-        public async Task Logout(string? token)
+        public async Task Logout(string? token, ClaimsPrincipal user)
         {
             await CheckToken(token);
+
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                throw new UnauthorizedAccessException();
 
             var blacklistToken = new BlacklistTokenDb
             {
@@ -132,7 +137,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 AddTime = DateTime.Now.ToUniversalTime(),
             };
 
-            
+            await _tokenService.HandleTokens(new Guid(userId), Guid.Empty);
 
             _context.BlacklistTokens.Add(blacklistToken);
             await _context.SaveChangesAsync();
@@ -182,6 +187,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 allUsers = await allUsersQuerable
                     .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
                     .ToListAsync();
+
             List<UserShortDTO> res = new List<UserShortDTO>();
 
             foreach (var user in allUsers)
@@ -204,11 +210,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                     count = (int)Math.Ceiling((decimal)res.Count() / size),
                     current = page
                 }
-
             };
 
-            return (response);
-
+            return response;
         }
 
         public async Task<RoleResponseDTO> GetUserHighestRole(Guid id)

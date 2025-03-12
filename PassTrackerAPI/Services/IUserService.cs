@@ -11,7 +11,7 @@ namespace PassTrackerAPI.Services
         public Task<UserProfileDTO> GetUserProfileById(Guid id);
         public Task<UserProfileDTO> GetProfile(ClaimsPrincipal user);
         public Task<UsersPagedListModel> GetAllUsers(int page, int size, bool newUsersOnly = false );
-        public Task Logout(string? token);
+        public Task Logout(string? token, ClaimsPrincipal user);
         public Task<RoleResponseDTO> GetUserHighestRole(Guid id);
         public Task EditUserEmail(ClaimsPrincipal user, UserEditEmailDTO email);
         public Task EditUserPassword(ClaimsPrincipal user, UserEditPasswordDTO password);
