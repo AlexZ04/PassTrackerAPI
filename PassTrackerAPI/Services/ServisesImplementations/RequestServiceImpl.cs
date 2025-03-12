@@ -15,13 +15,14 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     {
         private readonly DataContext _context;
         private readonly IUserRepository _userRepository;
+        private readonly IRequestRepository _requestRepository;
 
-        public RequestServiceImpl(DataContext context, IUserRepository userRepository)
+        public RequestServiceImpl(DataContext context, IUserRepository userRepository, IRequestRepository requestRepository)
         {
             _context = context;
             _userRepository = userRepository;
+            _requestRepository = requestRepository;
         }
-
 
         public async Task CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
         {
@@ -61,10 +62,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (userId == null)
                 throw new UnauthorizedAccessException();
-            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
-            if (req.User.Id != new Guid(userId)) { throw new UnauthorizedAccessException(); }
+            var req = await _requestRepository.GetRequestById(requestId);
+
+            if (req.User.Id != new Guid(userId))
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION,
+                ErrorMessages.THIS_REQUEST_IS_NOT_BELONGS_TO_USER);
 
             req.StartDate = request.StartDate;
             req.FinishDate = request.FinishDate;
@@ -80,10 +83,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (userId == null)
                 throw new UnauthorizedAccessException();
-            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (req == null) throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
-            if (req.User.Id != new Guid(userId)) throw new UnauthorizedAccessException();
+            var req = await _requestRepository.GetRequestById(requestId);
+
+            if (req.User.Id != new Guid(userId)) 
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION,
+                ErrorMessages.THIS_REQUEST_IS_NOT_BELONGS_TO_USER);
 
             if (req.StatusRequest != StatusRequestDB.Accepted)
             {
@@ -92,7 +97,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 return;
             }
 
-            throw new CredentialsException(ErrorTitles.REQUEST_ERROR, ErrorMessages.CANNOT_DELETE_ACCEPTED_REQUEST);
+            throw new InvalidActionException(ErrorTitles.REQUEST_ERROR, ErrorMessages.CANNOT_DELETE_ACCEPTED_REQUEST);
         }
 
         public async Task<RequestDTO> GetRequestInfo(Guid requestId, ClaimsPrincipal user)
@@ -102,13 +107,11 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(el => el.Id == requestId);
+            var req = await _requestRepository.GetRequestById(requestId);
 
             var userProfile = await _userRepository.GetUserById(new Guid(userId));
 
             bool isUserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
-
-            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
  
             if(userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Deanery) ||
                 userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAmin || req.User.Id == new Guid(userId)) 
@@ -129,7 +132,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 return request;
             }
 
-            throw new UnauthorizedAccessException(); 
+            throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.YOU_CANT_GET_THIS_REQUEST_INFO); 
         }
 
         public async Task<RequestsPagedListDTO> GetAllRequests(StatusRequestDB? StatusRequestSort, 

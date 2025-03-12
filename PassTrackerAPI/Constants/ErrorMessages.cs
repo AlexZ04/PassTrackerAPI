@@ -14,5 +14,7 @@
         public const string NOT_EXISTING_REQUEST = "There is no such request!";
         public const string REFRESH_TOKEN_IS_NOT_VALID = "Refresh token is not valid!";
         public const string USER_IS_NOT_STUDENT = "This user is not a student!";
+        public const string THIS_REQUEST_IS_NOT_BELONGS_TO_USER = "This request is not belongs to user";
+        public const string YOU_CANT_GET_THIS_REQUEST_INFO = "You can't get this request info";
     }
 }

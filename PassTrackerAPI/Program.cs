@@ -67,6 +67,7 @@ builder.Services.AddTransient<IAdminService, AdminServiceImpl>();
 builder.Services.AddScoped<ITokenService, TokenServiceImpl>();
 builder.Services.AddTransient<IHasherService, HasherServiceImpl>();
 builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
+builder.Services.AddScoped<IRequestRepository, RequestRepositoryImpl>();
 builder.Services.AddTransient<IRequestService, RequestServiceImpl>();
 builder.Services.AddTransient<IDeaneryService, DeaneryServiceImpl>();
 
