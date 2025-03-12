@@ -58,7 +58,7 @@ namespace PassTrackerAPI.Controllers
 
 
         /// <summary>
-        /// Get excel document of requests !!For Admins and Deanery only
+        /// Get excel document of requests !!For Admins, Deanery and Teachers only
         /// </summary>
         /// <response code="204">Success</response>
         /// <response code="401">Unauthorized (or user don't have necessary roles)</response>
@@ -66,7 +66,7 @@ namespace PassTrackerAPI.Controllers
         [ProducesResponseType(typeof(byte[]), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(UnsuccessfulRequestDTO), StatusCodes.Status500InternalServerError)]
-        [HttpGet("download-requests"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
+        [HttpGet("download-requests"), Authorize(Roles = "Admin,Deanery,Teacher"), CheckTokenLife]
         public async Task<IActionResult> DownloadReqs()
         {
             return File(
