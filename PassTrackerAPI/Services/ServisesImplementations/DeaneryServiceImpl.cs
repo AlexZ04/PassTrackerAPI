@@ -23,7 +23,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         public async Task AcceptRequest(Guid requestId)
         {
             var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
-            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
+            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+
             req.StatusRequest = StatusRequestDB.Accepted;
             await _context.SaveChangesAsync();
         }
@@ -31,7 +32,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment)
         {
             var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
-            if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }
+            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+
             req.StatusRequest = StatusRequestDB.Declined;
             req.Comment = Comment.Comment;
             await _context.SaveChangesAsync();
@@ -39,8 +41,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task<byte[]> DownloadRequest(bool havePhoto)
         {
-
-            var table = await _context.Requests.Include(o => o.User)
+            var table = await _context.Requests
+                .Include(o => o.User)
             .Select(o => new RequestExcelDTO
             {
                     
@@ -79,7 +81,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                     worksheet.Cells[i + 2, 5].Value = table[i].StatusRequest;
                     worksheet.Cells[i + 2, 6].Value = table[i].Comment;
                     //worksheet.Cells[i + 2, 7].Value = table[i].Photo;
-
                 }
 
                 worksheet.Cells.AutoFitColumns();
@@ -88,7 +89,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             }
 
             return excelData;
-
         }
     }
 }
