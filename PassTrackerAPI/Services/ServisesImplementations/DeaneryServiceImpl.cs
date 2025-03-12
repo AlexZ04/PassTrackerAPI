@@ -28,7 +28,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequest Comment)
+        public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment)
         {
             var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
             if (req == null) { throw new CredentialsException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST); }

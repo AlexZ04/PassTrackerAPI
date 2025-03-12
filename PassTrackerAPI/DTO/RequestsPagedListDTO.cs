@@ -1,8 +1,8 @@
 ﻿namespace PassTrackerAPI.DTO
 {
-    public class RequestsPagedListModel
+    public class RequestsPagedListDTO
     {
         public List<RequestShortDTO> Requests { get; set; }
-        public PageInfoModel Pagination { get; set; }
+        public PageInfoDTO Pagination { get; set; }
     }
 }

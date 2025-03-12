@@ -132,7 +132,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             throw new UnauthorizedAccessException(); 
         }
 
-        public async Task<RequestsPagedListModel> GetAllRequests(StatusRequestDB? StatusRequestSort, 
+        public async Task<RequestsPagedListDTO> GetAllRequests(StatusRequestDB? StatusRequestSort, 
             DateTime? StartDate, DateTime? FinishDate, int? Group, string? Name, int page, int size)
         {
             var requests = await _context.Requests.Include(el => el.User)
@@ -164,10 +164,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 requests = requests.Where(el => el.UserName.ToUpper().Contains(Name.ToUpper())).ToList();
 
             var paged = requests.Skip((page - 1) * size).Take(size).ToList();
-            RequestsPagedListModel response = new RequestsPagedListModel
+            RequestsPagedListDTO response = new RequestsPagedListDTO
             {
                 Requests = paged,
-                Pagination = new PageInfoModel
+                Pagination = new PageInfoDTO
                 {
                     size = size,
                     count = (int)Math.Ceiling((decimal)requests.Count() / size),
@@ -179,7 +179,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return response;
         }
 
-        public async Task<RequestsPagedListModel> GetAllUserRequests(ClaimsPrincipal user, int page, int size)
+        public async Task<RequestsPagedListDTO> GetAllUserRequests(ClaimsPrincipal user, int page, int size)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -189,7 +189,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             return await GetAllUsersRequestById(new Guid(userId), page, size);
         }
 
-        public async Task<RequestsPagedListModel> GetAllUsersRequestById(Guid id, int page, int size)
+        public async Task<RequestsPagedListDTO> GetAllUsersRequestById(Guid id, int page, int size)
         {
             var userRequests = await _context.Requests
                 .Include(el => el.User)
@@ -208,10 +208,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             var paged = userRequests.Skip((page - 1) * size).Take(size).ToList();
 
-            RequestsPagedListModel response = new RequestsPagedListModel
+            RequestsPagedListDTO response = new RequestsPagedListDTO
             {
                 Requests = paged,
-                Pagination = new PageInfoModel
+                Pagination = new PageInfoDTO
                 {
                     size = size,
                     count = (int)Math.Ceiling((decimal)userRequests.Count() / size),

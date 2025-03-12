@@ -148,11 +148,11 @@ public class UserController : ControllerBase
     /// <summary>
     /// Edit users email
     /// </summary>
-    /// <response code="200">Success</response>
+    /// <response code="204">Success</response>
     /// <response code="400">Invalid parameters</response>
     /// <response code="401">Unauthorized</response>
     /// <response code="500">Internal Server Error</response>
-    [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(void), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(UnsuccessfulRequestDTO), StatusCodes.Status500InternalServerError)]
@@ -170,11 +170,11 @@ public class UserController : ControllerBase
     /// <summary>
     /// Edit users password
     /// </summary>
-    /// <response code="200">Success</response>
+    /// <response code="204">Success</response>
     /// <response code="400">Invalid parameters</response>
     /// <response code="401">Unauthorized</response>
     /// <response code="500">Internal Server Error</response>
-    [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(UnsuccessfulRequestDTO), StatusCodes.Status500InternalServerError)]

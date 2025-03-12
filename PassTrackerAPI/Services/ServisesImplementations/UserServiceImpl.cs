@@ -172,7 +172,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         }
 
         // if newUsersOnly == false then get all not-new users
-        public async Task<UsersPagedListModel> GetAllUsers(int page, int size, bool newUsersOnly = false)
+        public async Task<UsersPagedListDTO> GetAllUsers(int page, int size, bool newUsersOnly = false)
         {
             var allUsersQuerable = _context.Users
                 .Include(u => u.Roles);
@@ -201,10 +201,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             }
 
             var paged = res.Skip((page - 1) * size).Take(size).ToList();
-            UsersPagedListModel response = new UsersPagedListModel
+            UsersPagedListDTO response = new UsersPagedListDTO
             {
                 Requests = paged,
-                Pagination = new PageInfoModel
+                Pagination = new PageInfoDTO
                 {
                     size = size,
                     count = (int)Math.Ceiling((decimal)res.Count() / size),

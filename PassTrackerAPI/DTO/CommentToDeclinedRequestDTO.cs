@@ -1,6 +1,6 @@
 ﻿namespace PassTrackerAPI.DTO
 {
-    public class CommentToDeclinedRequest
+    public class CommentToDeclinedRequestDTO
     {
         public string Comment { get; set; }
     }

@@ -1,6 +1,6 @@
 ﻿namespace PassTrackerAPI.DTO
 {
-    public class PageInfoModel
+    public class PageInfoDTO
     {
         public int size { get; set; }
         public int count { get; set; }

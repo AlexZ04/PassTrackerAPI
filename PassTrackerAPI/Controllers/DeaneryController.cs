@@ -27,7 +27,7 @@ namespace PassTrackerAPI.Controllers
         }
         
         [HttpPost("decline-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
-        public async Task<IActionResult> DeclineReq([FromRoute] Guid id, CommentToDeclinedRequest comment)
+        public async Task<IActionResult> DeclineReq([FromRoute] Guid id, CommentToDeclinedRequestDTO comment)
         {
             await _deaneryService.DeclineRequest(id, comment);
             return Ok();
