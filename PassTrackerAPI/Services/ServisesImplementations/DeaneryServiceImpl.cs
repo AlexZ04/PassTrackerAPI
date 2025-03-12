@@ -41,6 +41,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task<byte[]> DownloadRequest(bool havePhoto)
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var table = await _context.Requests
                 .Include(o => o.User)
             .Select(o => new RequestExcelDTO
