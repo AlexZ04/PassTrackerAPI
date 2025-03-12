@@ -100,7 +100,7 @@ namespace PassTrackerAPI.Controllers
 
 
         /// <summary>
-        /// Get all requests with filters !!For Admins and Deanery only
+        /// Get all requests with filters !!For Admins, Deanery and Teachers only
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="401">Unauthorized (or user don't have necessary roles)</response>
@@ -140,7 +140,7 @@ namespace PassTrackerAPI.Controllers
 
 
         /// <summary>
-        /// Get all user requests by his id !!For Admins and Deanery only
+        /// Get all user requests by his id !!For Admins, Deanery and Teachers only
         /// </summary>
         /// <response code="200">Success</response>
         /// <response code="401">Unauthorized</response>

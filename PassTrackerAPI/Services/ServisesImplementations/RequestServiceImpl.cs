@@ -4,6 +4,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Functions;
 using PassTrackerAPI.Migrations;
 using PassTrackerAPI.Repositories;
 using PassTrackerAPI.Repositories.RepositoriesImplementations;
@@ -119,7 +120,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 var request = new RequestDTO
                 {
                     Id = req.Id,
-                    UserName = req.User.SecondName + " " + req.User.SecondName + " " + req.User.MiddleName,
+                    UserName = ConcatName.ConcatNameFunc(req.User.SecondName, req.User.FirstName, req.User.MiddleName),
                     StartDate = req.StartDate,
                     FinishDate = req.FinishDate,
                     TypeRequest = req.TypeRequest,
@@ -142,7 +143,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             .Select(o => new RequestShortDTO
             {
                 Id = o.Id,
-                UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
+                UserName = ConcatName.ConcatNameFunc(o.User.SecondName, o.User.FirstName, o.User.MiddleName),
                 StartDate = o.StartDate,
                 FinishDate = o.FinishDate,
                 TypeRequest = o.TypeRequest,
@@ -200,7 +201,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 .Select(o => new RequestShortDTO
                 {
                     Id = o.Id,
-                    UserName = o.User.SecondName + " " + o.User.SecondName + " " + o.User.MiddleName,
+                    UserName = ConcatName.ConcatNameFunc(o.User.SecondName, o.User.FirstName, o.User.MiddleName),
                     StartDate = o.StartDate,
                     FinishDate = o.FinishDate,
                     TypeRequest = o.TypeRequest,
@@ -225,6 +226,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             return response;
         }
- 
+
     }
 }

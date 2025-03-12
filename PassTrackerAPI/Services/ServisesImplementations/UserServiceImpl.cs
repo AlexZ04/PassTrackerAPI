@@ -5,6 +5,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Functions;
 using PassTrackerAPI.Migrations;
 using PassTrackerAPI.Repositories;
 using System.Security.Claims;
@@ -149,7 +150,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             var userInfo = new UserProfileDTO
             {
-                Name = ConcatName(user.SecondName, user.FirstName, user.MiddleName),
+                Name = ConcatName.ConcatNameFunc(user.SecondName, user.FirstName, user.MiddleName),
                 Group = user.Group,
                 Email = user.Email,
                 Roles = new List<RoleDb>()
@@ -195,7 +196,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 res.Add(new UserShortDTO
                 {
                     Id = user.Id,
-                    Name = ConcatName(user.SecondName, user.FirstName, user.MiddleName),
+                    Name = ConcatName.ConcatNameFunc(user.SecondName, user.FirstName, user.MiddleName),
                     Group = user.Group
                 });
             }
@@ -274,11 +275,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             if (token == null || await _context.BlacklistTokens.FindAsync(token) != null)
                 throw new UnauthorizedAccessException();
-        }
-
-        private string ConcatName(string secondName, string firstName, string thirdName)
-        {
-            return secondName + " " + firstName + " " + thirdName; 
         }
 
         private async Task<List<string>> GetUserRoles(UserDb user)
