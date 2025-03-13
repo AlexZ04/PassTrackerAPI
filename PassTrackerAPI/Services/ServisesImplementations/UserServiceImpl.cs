@@ -73,7 +73,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             string token = _tokenService.CreateAccessTokenById(newUser.Id, await GetUserRoles(newUser));
 
-            return new TokenResponseDTO(token, refreshToken.Token);
+            return new TokenResponseDTO
+            {
+                AccessToken = token,
+                RefreshToken = refreshToken.Token,
+                AccessTokenExpireTime = DateTime.UtcNow.AddMinutes(AuthOptions.LIFETIME_MINUTES)
+            };
         }
 
         public async Task<TokenResponseDTO> LoginUser(UserLoginDTO user)
@@ -100,7 +105,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
-            return new TokenResponseDTO(token, refreshToken.Token);
+            return new TokenResponseDTO
+            {
+                AccessToken = token,
+                RefreshToken = refreshToken.Token,
+                AccessTokenExpireTime = DateTime.UtcNow.AddMinutes(AuthOptions.LIFETIME_MINUTES)
+            };
         }
 
         public async Task<TokenResponseDTO> LoginWithRefreshToken(RefreshTokenDTO token)
@@ -120,7 +130,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             await _context.SaveChangesAsync();
 
-            return new TokenResponseDTO(accessToken, refreshToken.Token);
+            return new TokenResponseDTO
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                AccessTokenExpireTime = DateTime.UtcNow.AddMinutes(AuthOptions.LIFETIME_MINUTES)
+            };
         }
 
         public async Task Logout(string? token, ClaimsPrincipal user)
@@ -150,6 +165,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             var userInfo = new UserProfileDTO
             {
+                Id = user.Id,
                 Name = ConcatName.ConcatNameFunc(user.SecondName, user.FirstName, user.MiddleName),
                 Group = user.Group,
                 Email = user.Email,
