@@ -6,6 +6,7 @@ using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
 using PassTrackerAPI.Repositories;
+using System.Security.Claims;
 
 namespace PassTrackerAPI.Services.ServisesImplementations
 {
@@ -22,19 +23,35 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _userRepository = userRepository;
         }
 
-        public async Task GiveUserRole(Guid id, RoleControlDTO role)
+        public async Task GiveUserRole(Guid id, RoleControlDTO role, ClaimsPrincipal Execuser)
         {
             var user = await _userRepository.GetUserById(id);
 
-            CheckRole(role);
+            //CheckRole(role);
 
-            var roleFromDb = role == RoleControlDTO.Teacher ? RoleDb.Teacher : RoleDb.Deanery;
+            //var roleFromDb = role == RoleControlDTO.Teacher ? RoleDb.Teacher : RoleDb.Deanery;
+            var roleFromDb = RoleDb.Teacher;
+            if (role == RoleControlDTO.Teacher) {  roleFromDb = RoleDb.Teacher; }
+
+            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+            
+            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
+
+            var execuserId = Execuser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (execuserId == null)
+                throw new UnauthorizedAccessException();
+
+            bool isExecuserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
+
 
             if (user.Roles.Select(u => u.Role).Contains(roleFromDb))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_ALREADY_HAVE_THIS_ROLE);
 
-            if (user.Roles.Select(u => u.Role).Contains(RoleDb.New))
-                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_CONFIRMED);
+            if (roleFromDb == RoleDb.Deanery && !isExecuserAmin)
+            {
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.ONLY_FOR_ADMINS);
+            }
 
             var newUserRole = BuildUserRoleDb(user, roleFromDb);
 
@@ -44,13 +61,29 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task TakeUserRole(Guid id, RoleControlDTO role)
+        public async Task TakeUserRole(Guid id, RoleControlDTO role, ClaimsPrincipal Execuser)
         {
             var user = await _userRepository.GetUserById(id);
 
-            CheckRole(role);
+            //CheckRole(role);
+            var roleFromDb = RoleDb.Teacher;
+            if (role == RoleControlDTO.Teacher) { roleFromDb = RoleDb.Teacher; }
 
-            var roleFromDb = role == RoleControlDTO.Teacher ? RoleDb.Teacher : RoleDb.Deanery;
+            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+
+            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
+
+            var execuserId = Execuser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (execuserId == null)
+                throw new UnauthorizedAccessException();
+
+            bool isExecuserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
+
+            if (roleFromDb == RoleDb.Deanery && !isExecuserAmin)
+            {
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.ONLY_FOR_ADMINS);
+            }
 
             if (!user.Roles.Select(u => u.Role).Contains(roleFromDb))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_HAVING_THIS_ROLE);

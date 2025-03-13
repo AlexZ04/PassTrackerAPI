@@ -6,6 +6,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Migrations;
 using PassTrackerAPI.Repositories;
 using System.Drawing;
 
@@ -39,7 +40,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task<byte[]> DownloadRequest(bool havePhoto)
+        public async Task<byte[]> DownloadRequest(StatusRequestDB? StatusRequestSort)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var table = await _context.Requests
@@ -53,11 +54,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 TypeRequest = o.TypeRequest,
                 StatusRequest = o.StatusRequest,
                 Group = o.User.Group,
-                Photo = havePhoto  ? o.Photo : null,
                 Comment = o.Comment
 
             }).ToListAsync();
-            
+
+            if (StatusRequestSort != null)
+                table = table.Where(el => el.StatusRequest == StatusRequestSort).ToList();
+
             byte[] excelData;
             using (var package = new ExcelPackage())
             {

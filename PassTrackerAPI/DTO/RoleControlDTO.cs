@@ -3,6 +3,7 @@
     public enum RoleControlDTO
     {
         Teacher,
-        Deanery
+        Deanery,
+        Student
     }
 }

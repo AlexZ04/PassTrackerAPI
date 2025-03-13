@@ -7,6 +7,7 @@ using PassTrackerAPI.Filters;
 using PassTrackerAPI.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace PassTrackerAPI.Controllers
 {
@@ -42,7 +43,7 @@ namespace PassTrackerAPI.Controllers
         [CheckTokenLife]
         public async Task<IActionResult> GiveUserRole([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
-            await _adminService.GiveUserRole(id, role);
+            await _adminService.GiveUserRole(id, role, User);
 
             return NoContent();
         }
@@ -66,7 +67,7 @@ namespace PassTrackerAPI.Controllers
         [CheckTokenLife]
         public async Task<IActionResult> TakeUserRole([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
-            await _adminService.TakeUserRole(id, role);
+            await _adminService.TakeUserRole(id, role, User);
 
             return NoContent();
         }
@@ -84,10 +85,13 @@ namespace PassTrackerAPI.Controllers
         [HttpGet("users")]
         [Authorize(Roles = "Admin,Deanery")]
         [CheckTokenLife]
-        public async Task<IActionResult> GetAllUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, 
+        public async Task<IActionResult> GetAllUsers(
+            [FromQuery] int? Group,
+            [FromQuery] string? Name, 
+            [FromQuery, Range(1, int.MaxValue)] int page = 1, 
             [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
-            return Ok(await _userService.GetAllUsers(page, size));
+            return Ok(await _userService.GetAllUsers(Group,Name, page, size));
         }
 
 
@@ -106,7 +110,7 @@ namespace PassTrackerAPI.Controllers
         public async Task<IActionResult> GetAllNewUsers([FromQuery, Range(1, int.MaxValue)] int page = 1, 
             [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
-            return Ok(await _userService.GetAllUsers(page, size, true));
+            return Ok(await _userService.GetAllUsers(null, null, page, size, true));
         }
 
 

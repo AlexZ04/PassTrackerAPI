@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Filters;
 using PassTrackerAPI.Services;
@@ -67,10 +68,10 @@ namespace PassTrackerAPI.Controllers
         [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(UnsuccessfulRequestDTO), StatusCodes.Status500InternalServerError)]
         [HttpGet("download-requests"), Authorize(Roles = "Admin,Deanery,Teacher"), CheckTokenLife]
-        public async Task<IActionResult> DownloadReqs()
+        public async Task<IActionResult> DownloadReqs([FromQuery] StatusRequestDB? StatusRequestSort)
         {
             return File(
-            await _deaneryService.DownloadRequest(true),
+            await _deaneryService.DownloadRequest(StatusRequestSort),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
             "requests.xlsx" 
             );

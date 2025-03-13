@@ -1,4 +1,5 @@
-﻿using PassTrackerAPI.DTO;
+﻿using PassTrackerAPI.Data.Entities;
+using PassTrackerAPI.DTO;
 using System.Security.Claims;
 
 namespace PassTrackerAPI.Services
@@ -7,6 +8,6 @@ namespace PassTrackerAPI.Services
     {
         public Task AcceptRequest(Guid requestId);
         public Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment);
-        public Task<byte[]> DownloadRequest(bool havePhoto);
+        public Task<byte[]> DownloadRequest(StatusRequestDB? StatusRequestSort);
     }
 }
