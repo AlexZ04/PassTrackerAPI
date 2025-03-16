@@ -42,13 +42,17 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (execuserId == null)
                 throw new UnauthorizedAccessException();
 
-            bool isExecuserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
+            bool isExecuserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
 
 
             if (user.Roles.Select(u => u.Role).Contains(roleFromDb))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_ALREADY_HAVE_THIS_ROLE);
 
-            if (roleFromDb == RoleDb.Deanery && !isExecuserAmin)
+
+            if (user.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_CONFIRMED);
+
+            if (roleFromDb == RoleDb.Deanery && !isExecuserAdmin)
             {
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.ONLY_FOR_ADMINS);
             }
@@ -78,9 +82,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (execuserId == null)
                 throw new UnauthorizedAccessException();
 
-            bool isExecuserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
+            bool isExecuserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
 
-            if (roleFromDb == RoleDb.Deanery && !isExecuserAmin)
+            if (roleFromDb == RoleDb.Deanery && !isExecuserAdmin)
             {
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.ONLY_FOR_ADMINS);
             }
@@ -107,17 +111,23 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task ConfirmUser(Guid id)
+        public async Task ConfirmUser(Guid id, RoleControlDTO role)
         {
             var user = await _userRepository.GetUserById(id);
 
             if (!user.Roles.Select(u => u.Role).Contains(RoleDb.New))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_NOT_NEW);
+            var roleFromDb = RoleDb.Teacher;
+            if (role == RoleControlDTO.Teacher) { roleFromDb = RoleDb.Teacher; }
+
+            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+
+            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
 
             var newUserRole = new UserRoleDb
             {
                 Id = Guid.NewGuid(),
-                Role = RoleDb.Student,
+                Role = roleFromDb,
                 User = user
             };
 

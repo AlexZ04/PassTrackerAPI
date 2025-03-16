@@ -48,7 +48,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 TypeRequest = request.TypeRequest,
                 StatusRequest = StatusRequestDB.Pending,
                 Comment = null,
-                Photo = request.Photo
+                Photo = request.Photo,
+                InDeanery = request.InDeanery
             };
 
             _context.Requests.Add(newRequest);
@@ -74,7 +75,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             req.FinishDate = request.FinishDate;
             req.TypeRequest = request.TypeRequest;
             req.Photo = request.Photo;
-
+            req.InDeanery = request.InDeanery;
             await _context.SaveChangesAsync();
         }
 
@@ -112,10 +113,10 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             var userProfile = await _userRepository.GetUserById(new Guid(userId));
 
-            bool isUserAmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
+            bool isUserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
  
             if(userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Deanery) ||
-                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAmin || req.User.Id == new Guid(userId)) 
+                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAdmin || req.User.Id == new Guid(userId)) 
             {
                 var request = new RequestDTO
                 {
@@ -127,7 +128,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                     StatusRequest = req.StatusRequest,
                     Comment = req.Comment,
                     Photo = req.Photo,
-                    Group = req.User.Group
+                    Group = req.User.Group,
+                    InDeanery = req.InDeanery
                 };
 
                 return request;

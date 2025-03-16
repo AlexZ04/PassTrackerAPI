@@ -16,5 +16,8 @@
         public const string USER_IS_NOT_STUDENT = "This user is not a student!";
         public const string THIS_REQUEST_IS_NOT_BELONGS_TO_USER = "This request is not belongs to user";
         public const string YOU_CANT_GET_THIS_REQUEST_INFO = "You can't get this request info";
+        public const string YOU_CAN_PROLONG_ONLY_EDUCATIONAL_ACTIVITY = "You can prolong only educational activity";
+        public const string YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST = "You can prolong only accepted request";
+        public const string YOU_CANT_SHORT_REQUEST = "You cant short request";
     }
 }

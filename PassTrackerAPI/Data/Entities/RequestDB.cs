@@ -8,6 +8,7 @@
         public DateTime FinishDate { get; set; }
         public TypeRequestDB TypeRequest { get; set; }
         public StatusRequestDB StatusRequest { get; set; }
+        public bool InDeanery { get; set; }
         public string? Comment { get; set; }
         public byte[]? Photo { get; set; }
 

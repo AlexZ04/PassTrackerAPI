@@ -9,7 +9,7 @@ namespace PassTrackerAPI.DTO
         public DateTime StartDate { get; set; }
         public DateTime FinishDate { get; set; }
         public TypeRequestDB TypeRequest { get; set; }
-        
+        public bool InDeanery { get; set; }
         [AllowNull]
         public byte[]? Photo { get; set; }
 

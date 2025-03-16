@@ -146,9 +146,9 @@ namespace PassTrackerAPI.Controllers
         [HttpPost("confirm-user")]
         [Authorize(Roles = "Admin")]
         [CheckTokenLife]
-        public async Task<IActionResult> ConfirmUser([FromQuery] Guid id)
+        public async Task<IActionResult> ConfirmUser([FromQuery] Guid id, [FromQuery] RoleControlDTO role)
         {
-            await _adminService.ConfirmUser(id);
+            await _adminService.ConfirmUser(id, role);
 
             return NoContent();
         }

@@ -57,6 +57,16 @@ namespace PassTrackerAPI.Controllers
             return Ok();
         }
 
+        [ProducesResponseType(typeof(void), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(void), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(UnsuccessfulRequestDTO), StatusCodes.Status500InternalServerError)]
+        [HttpPut("prolong-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
+        public async Task<IActionResult> ProlongEducationRequest([FromRoute] Guid id, FinishDateDTO FinishDate)
+        {
+            await _deaneryService.ProlongEducationRequest(id, FinishDate);
+            return Ok();
+        }
 
         /// <summary>
         /// Get excel document of requests !!For Admins, Deanery and Teachers only
@@ -71,7 +81,7 @@ namespace PassTrackerAPI.Controllers
         public async Task<IActionResult> DownloadReqs([FromQuery] StatusRequestDB? StatusRequestSort)
         {
             return File(
-            await _deaneryService.DownloadRequest(StatusRequestSort),
+            await _deaneryService.DownloadRequest(StatusRequestSort, User),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
             "requests.xlsx" 
             );
