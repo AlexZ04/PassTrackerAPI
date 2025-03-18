@@ -53,7 +53,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.NOT_EXISTING_REQUEST);
             if (req.StatusRequest != StatusRequestDB.Accepted)
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST);
-            if (req.FinishDate < Date.FinishDate)
+            if (req.FinishDate > Date.FinishDate)
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CANT_SHORT_REQUEST);
             
             req.FinishDate = Date.FinishDate;
