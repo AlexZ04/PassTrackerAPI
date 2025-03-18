@@ -6,6 +6,7 @@ using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
 using PassTrackerAPI.DTO;
 using PassTrackerAPI.Exceptions;
+using PassTrackerAPI.Functions;
 using PassTrackerAPI.Migrations;
 using PassTrackerAPI.Repositories;
 using System.Drawing;
@@ -17,16 +18,19 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     {
         private readonly DataContext _context;
         private readonly IUserRepository _userRepository;
-        public DeaneryServiceImpl(DataContext context, IUserRepository userRepository)
+        private readonly IRequestRepository _requestRepository;
+
+        public DeaneryServiceImpl(DataContext context, IUserRepository userRepository, IRequestRepository requestRepository)
         {
             _context = context;
             _userRepository = userRepository;
+            _requestRepository = requestRepository;
         }
 
         public async Task AcceptRequest(Guid requestId)
         {
-            var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
-            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+            var req = await _requestRepository.GetRequestById(requestId);
+            
             req.Comment = null;
             req.StatusRequest = StatusRequestDB.Accepted;
             await _context.SaveChangesAsync();
@@ -34,8 +38,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment)
         {
-            var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
-            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+            var req = await _requestRepository.GetRequestById(requestId);
 
             req.StatusRequest = StatusRequestDB.Declined;
             req.Comment = Comment.Comment;
@@ -44,10 +47,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
         public async Task ProlongEducationRequest(Guid requestId, FinishDateDTO Date)
         {
-            var req = await _context.Requests.FirstOrDefaultAsync(el => el.Id == requestId);
-            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
-            
-            if(req.TypeRequest != TypeRequestDB.EducationalActivity )
+            var req = await _requestRepository.GetRequestById(requestId);
+
+            if (req.TypeRequest != TypeRequestDB.EducationalActivity )
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.NOT_EXISTING_REQUEST);
             if (req.StatusRequest != StatusRequestDB.Accepted)
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST);
@@ -72,18 +74,15 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             bool isUserDeanery = false;
             var userRoles =  userProfile.Roles.Select(u => u.Role).ToList();
             
-            if (userRoles.Contains(RoleDb.Teacher)) { isUserTeacger = true; }
-            if (userRoles.Contains(RoleDb.Deanery)) { isUserDeanery = true; }
-
-
+            if (userRoles.Contains(RoleDb.Teacher)) isUserTeacger = true;
+            if (userRoles.Contains(RoleDb.Deanery)) isUserDeanery = true;
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             var table = await _context.Requests
                 .Include(o => o.User)
             .Select(o => new RequestExcelDTO
             {
-                    
-                UserName = o.User.SecondName + " " + o.User.FirstName + " " + o.User.MiddleName,
+                UserName = ConcatName.ConcatNameFunc(o.User.SecondName, o.User.FirstName, o.User.MiddleName),
                 StartDate = o.StartDate,
                 FinishDate = o.FinishDate,
                 TypeRequest = o.TypeRequest,
@@ -147,8 +146,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
                     }
                 }
-
-
 
                 worksheet.Cells.AutoFitColumns();
 
