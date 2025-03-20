@@ -264,6 +264,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
+            await CheckEmailIfUsed(email.Email);
+
             var foundUser = await _userRepository.GetUserById(new Guid(userId));
 
             foundUser.Email = email.Email;
@@ -284,6 +286,62 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<UsersPagedListDTO> GetAllUsersWithoutAdmins(int? Group, string? Name, int page, int size, bool newUsersOnly = false)
+        {
+            var allUsersQuerable = _context.Users
+                .Include(u => u.Roles);
+
+            List<UserDb> allUsers;
+
+            if (newUsersOnly)
+                allUsers = await allUsersQuerable
+                    .Where(u => u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .ToListAsync();
+            else
+                allUsers = await allUsersQuerable
+                    .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .ToListAsync();
+            var allAdmins = await _context.Admins.ToListAsync();
+            allUsers = allUsersQuerable
+                .Where(u => !allAdmins.Select(u => u.Id).Contains(u.Id))
+                .ToList();
+
+            List<UserShortDTO> res = new List<UserShortDTO>();
+
+            foreach (var user in allUsers)
+            {
+                res.Add(new UserShortDTO
+                {
+                    Id = user.Id,
+                    Name = ConcatName.ConcatNameFunc(user.SecondName, user.FirstName, user.MiddleName),
+                    Group = user.Group
+                });
+            }
+
+            if (Group != null)
+                res = res.Where(el => el.Group == Group).ToList();
+
+            if (Name != null)
+                res = res.Where(el => el.Name.ToUpper().Contains(Name.ToUpper())).ToList();
+
+
+            var paged = res.Skip((page - 1) * size).Take(size).ToList();
+            UsersPagedListDTO response = new UsersPagedListDTO
+            {
+                Requests = paged,
+                Pagination = new PageInfoDTO
+                {
+                    size = size,
+                    count = (int)Math.Ceiling((decimal)res.Count() / size),
+                    current = page
+                }
+            };
+
+            return response;
+        }
+
+
 
         // private helpful functions
         private async Task CheckEmailIfUsed(string email)

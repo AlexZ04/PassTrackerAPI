@@ -10,14 +10,17 @@ namespace PassTrackerAPI.DTO
         [Required]
         [MinLength(1)]
         [MaxLength(100)]
+        [RegularExpression("^[А-ЯЁ][а-яё]*|[A-Z][a-z]*$", ErrorMessage = "Invalid SecondName")]
         public string SecondName { get; set; }
         [Required]
         [MinLength(1)]
         [MaxLength(100)]
+        [RegularExpression("^[А-ЯЁ][а-яё]*|[A-Z][a-z]*$", ErrorMessage = "Invalid FirstName")]
         public string FirstName { get; set; }
         [Required]
         [MinLength(1)]
         [MaxLength(100)]
+        [RegularExpression("^[А-ЯЁ][а-яё]*|[A-Z][a-z]*$", ErrorMessage = "Invalid MiddleName")]
         public string MiddleName { get; set; }
         [AllowNull]
         public int? Group { get; set; }

@@ -15,5 +15,6 @@ namespace PassTrackerAPI.Services
         public Task<RoleResponseDTO> GetUserHighestRole(Guid id);
         public Task EditUserEmail(ClaimsPrincipal user, UserEditEmailDTO email);
         public Task EditUserPassword(ClaimsPrincipal user, UserEditPasswordDTO password);
+            public Task<UsersPagedListDTO> GetAllUsersWithoutAdmins(int? Group, string? Name, int page, int size, bool newUsersOnly = false);
     }
 }

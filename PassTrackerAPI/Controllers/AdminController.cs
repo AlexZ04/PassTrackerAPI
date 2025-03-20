@@ -91,7 +91,7 @@ namespace PassTrackerAPI.Controllers
             [FromQuery, Range(1, int.MaxValue)] int page = 1, 
             [FromQuery, Range(1, int.MaxValue)] int size = 5)
         {
-            return Ok(await _userService.GetAllUsers(Group,Name, page, size));
+            return Ok(await _userService.GetAllUsersWithoutAdmins(Group,Name, page, size));
         }
 
 
