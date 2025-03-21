@@ -55,7 +55,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             _context.Requests.Add(newRequest);
 
             await _context.SaveChangesAsync();
-
         }
 
         public async Task ChangeRequest(Guid requestId, RequestChangeDTO request, ClaimsPrincipal user)
@@ -76,6 +75,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             req.TypeRequest = request.TypeRequest;
             req.Photo = request.Photo;
             req.InDeanery = request.InDeanery;
+
             await _context.SaveChangesAsync();
         }
 
@@ -113,10 +113,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             var userProfile = await _userRepository.GetUserById(new Guid(userId));
 
-            bool isUserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
+            bool isUserAdmin = await _context.Admins
+                .FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
  
             if(userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Deanery) ||
-                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) || isUserAdmin || req.User.Id == new Guid(userId)) 
+                userProfile.Roles.Select(u => u.Role).Contains(RoleDb.Teacher ) 
+                || isUserAdmin || req.User.Id == new Guid(userId)) 
             {
                 var request = new RequestDTO
                 {
@@ -228,6 +230,5 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             return response;
         }
-
     }
 }

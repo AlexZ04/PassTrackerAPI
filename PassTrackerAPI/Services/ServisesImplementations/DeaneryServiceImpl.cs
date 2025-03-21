@@ -49,7 +49,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             var req = await _requestRepository.GetRequestById(requestId);
 
-            if (req.TypeRequest != TypeRequestDB.EducationalActivity )
+            if (req.TypeRequest != TypeRequestDB.EducationalActivity)
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.NOT_EXISTING_REQUEST);
             if (req.StatusRequest != StatusRequestDB.Accepted)
                 throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST);
@@ -69,10 +69,14 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 throw new UnauthorizedAccessException();
             var userProfile = await _userRepository.GetUserById(new Guid(userId));
 
-            bool isUserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
+            bool isUserAdmin = await _context.Admins
+                .FirstOrDefaultAsync(el => el.Id == new Guid(userId)) != null ? true : false;
+
             bool isUserTeacger = false;
             bool isUserDeanery = false;
-            var userRoles =  userProfile.Roles.Select(u => u.Role).ToList();
+            var userRoles =  userProfile.Roles
+                .Select(u => u.Role)
+                .ToList();
             
             if (userRoles.Contains(RoleDb.Teacher)) isUserTeacger = true;
             if (userRoles.Contains(RoleDb.Deanery)) isUserDeanery = true;
@@ -93,7 +97,8 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             }).ToListAsync();
 
             if (StatusRequestSort != null)
-                table = table.Where(el => el.StatusRequest == StatusRequestSort).ToList();
+                table = table.Where(el => el.StatusRequest == StatusRequestSort)
+                    .ToList();
 
             byte[] excelData;
             using (var package = new ExcelPackage())
@@ -131,7 +136,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                         worksheet.Cells[i + 2, 3].Value = table[i].FinishDate.ToString();
                         worksheet.Cells[i + 2, 4].Value = table[i].Group;
                         worksheet.Cells[i + 2, 5].Value = table[i].TypeRequest;
-
                     }
                 }
                 else if(isUserTeacger)
@@ -142,8 +146,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                         worksheet.Cells[i + 2, 2].Value = table[i].StartDate.ToString();
                         worksheet.Cells[i + 2, 3].Value = table[i].FinishDate.ToString();
                         worksheet.Cells[i + 2, 4].Value = table[i].Group;
-
-
                     }
                 }
 

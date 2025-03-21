@@ -296,15 +296,20 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (newUsersOnly)
                 allUsers = await allUsersQuerable
-                    .Where(u => u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .Where(u => u.Roles.Select(u => u.Role)
+                    .Contains(RoleDb.New))
                     .ToListAsync();
             else
                 allUsers = await allUsersQuerable
-                    .Where(u => !u.Roles.Select(u => u.Role).Contains(RoleDb.New))
+                    .Where(u => !u.Roles.Select(u => u.Role)
+                    .Contains(RoleDb.New))
                     .ToListAsync();
+
             var allAdmins = await _context.Admins.ToListAsync();
+
             allUsers = allUsersQuerable
-                .Where(u => !allAdmins.Select(u => u.Id).Contains(u.Id))
+                .Where(u => !allAdmins.Select(u => u.Id)
+                .Contains(u.Id))
                 .ToList();
 
             List<UserShortDTO> res = new List<UserShortDTO>();
@@ -323,7 +328,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
                 res = res.Where(el => el.Group == Group).ToList();
 
             if (Name != null)
-                res = res.Where(el => el.Name.ToUpper().Contains(Name.ToUpper())).ToList();
+                res = res.Where(el => el.Name.ToUpper()
+                .Contains(Name.ToUpper()))
+                    .ToList();
 
 
             var paged = res.Skip((page - 1) * size).Take(size).ToList();
@@ -340,8 +347,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             return response;
         }
-
-
 
         // private helpful functions
         private async Task CheckEmailIfUsed(string email)

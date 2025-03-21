@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PassTrackerAPI.Constants;
 using PassTrackerAPI.Data;
 using PassTrackerAPI.Data.Entities;
@@ -27,22 +26,20 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             var user = await _userRepository.GetUserById(id);
 
-            //CheckRole(role);
-
-            //var roleFromDb = role == RoleControlDTO.Teacher ? RoleDb.Teacher : RoleDb.Deanery;
             var roleFromDb = RoleDb.Teacher;
-            if (role == RoleControlDTO.Teacher) {  roleFromDb = RoleDb.Teacher; }
+            if (role == RoleControlDTO.Teacher) roleFromDb = RoleDb.Teacher;
 
-            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+            if (role == RoleControlDTO.Student) roleFromDb = RoleDb.Student;
             
-            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
+            if (role == RoleControlDTO.Deanery) roleFromDb = RoleDb.Deanery;
 
             var execuserId = Execuser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (execuserId == null)
                 throw new UnauthorizedAccessException();
 
-            bool isExecuserAdmin = await _context.Admins.FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
+            bool isExecuserAdmin = await _context.Admins
+                .FirstOrDefaultAsync(el => el.Id == new Guid(execuserId)) != null ? true : false;
 
 
             if (user.Roles.Select(u => u.Role).Contains(roleFromDb))
@@ -69,13 +66,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
         {
             var user = await _userRepository.GetUserById(id);
 
-            //CheckRole(role);
             var roleFromDb = RoleDb.Teacher;
-            if (role == RoleControlDTO.Teacher) { roleFromDb = RoleDb.Teacher; }
+            if (role == RoleControlDTO.Teacher) roleFromDb = RoleDb.Teacher;
 
-            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+            if (role == RoleControlDTO.Student) roleFromDb = RoleDb.Student;
 
-            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
+            if (role == RoleControlDTO.Deanery) roleFromDb = RoleDb.Deanery;
 
             var execuserId = Execuser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -92,7 +88,9 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (!user.Roles.Select(u => u.Role).Contains(roleFromDb))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_IS_NOT_HAVING_THIS_ROLE);
 
-            var userRole = user.Roles.FirstOrDefault(u => u.Role == roleFromDb);
+            var userRole = user.Roles
+                .FirstOrDefault(u => u.Role == roleFromDb);
+
             _context.UserRoles.Remove(userRole);
             user.Roles.Remove(userRole);
 
@@ -117,12 +115,13 @@ namespace PassTrackerAPI.Services.ServisesImplementations
 
             if (!user.Roles.Select(u => u.Role).Contains(RoleDb.New))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.USER_NOT_NEW);
+
             var roleFromDb = RoleDb.Teacher;
-            if (role == RoleControlDTO.Teacher) { roleFromDb = RoleDb.Teacher; }
+            if (role == RoleControlDTO.Teacher) roleFromDb = RoleDb.Teacher;
 
-            if (role == RoleControlDTO.Student) { roleFromDb = RoleDb.Student; }
+            if (role == RoleControlDTO.Student) roleFromDb = RoleDb.Student;
 
-            if (role == RoleControlDTO.Deanery) { roleFromDb = RoleDb.Deanery; }
+            if (role == RoleControlDTO.Deanery) roleFromDb = RoleDb.Deanery;
 
             var newUserRole = new UserRoleDb
             {
@@ -156,12 +155,6 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             };
 
             return newUserRole;
-        }
-
-        private void CheckRole(RoleControlDTO role)
-        {
-            if (role != RoleControlDTO.Teacher && role != RoleControlDTO.Deanery)
-                throw new InvalidActionException(ErrorTitles.INVALID_ACTION, ErrorMessages.INCORRECT_ROLE);
         }
         
     }
