@@ -18,48 +18,12 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     {
         private readonly DataContext _context;
         private readonly IUserRepository _userRepository;
-        private readonly IRequestRepository _requestRepository;
 
-        public DeaneryServiceImpl(DataContext context, IUserRepository userRepository, IRequestRepository requestRepository)
+        public DeaneryServiceImpl(DataContext context, IUserRepository userRepository)
         {
             _context = context;
             _userRepository = userRepository;
-            _requestRepository = requestRepository;
         }
-
-        public async Task AcceptRequest(Guid requestId)
-        {
-            var req = await _requestRepository.GetRequestById(requestId);
-            
-            req.Comment = null;
-            req.StatusRequest = StatusRequestDB.Accepted;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment)
-        {
-            var req = await _requestRepository.GetRequestById(requestId);
-
-            req.StatusRequest = StatusRequestDB.Declined;
-            req.Comment = Comment.Comment;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task ProlongEducationRequest(Guid requestId, FinishDateDTO Date)
-        {
-            var req = await _requestRepository.GetRequestById(requestId);
-
-            if (req.TypeRequest != TypeRequestDB.EducationalActivity)
-                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.NOT_EXISTING_REQUEST);
-            if (req.StatusRequest != StatusRequestDB.Accepted)
-                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST);
-            if (req.FinishDate > Date.FinishDate)
-                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CANT_SHORT_REQUEST);
-            
-            req.FinishDate = Date.FinishDate;
-            await _context.SaveChangesAsync();
-        }
-
 
         public async Task<byte[]> DownloadRequest(StatusRequestDB? StatusRequestSort, ClaimsPrincipal user)
         {

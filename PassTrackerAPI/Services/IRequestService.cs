@@ -16,5 +16,8 @@ namespace PassTrackerAPI.Services
         
         public Task<RequestsPagedListDTO> GetAllUserRequests(ClaimsPrincipal user, int page, int size);
         public Task<RequestsPagedListDTO> GetAllUsersRequestById(Guid id, int page, int size);
+        public Task AcceptRequest(Guid requestId);
+        public Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment);
+        public Task ProlongEducationRequest(Guid requestId, FinishDateDTO FinishDate);
     }
 }

@@ -13,10 +13,12 @@ namespace PassTrackerAPI.Controllers
     public class DeaneryController : ControllerBase
     {
         private readonly IDeaneryService _deaneryService;
+        private readonly IRequestService _requestService;
 
-        public DeaneryController(IDeaneryService deaneryService)
+        public DeaneryController(IDeaneryService deaneryService, IRequestService requestService)
         {
             _deaneryService = deaneryService;
+            _requestService = requestService;
         }
 
 
@@ -34,7 +36,7 @@ namespace PassTrackerAPI.Controllers
         [HttpPost("accept-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> AcceptReq([FromRoute] Guid id)
         {
-            await _deaneryService.AcceptRequest(id);
+            await _requestService.AcceptRequest(id);
             return Ok();
         }
 
@@ -53,7 +55,7 @@ namespace PassTrackerAPI.Controllers
         [HttpPost("decline-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> DeclineReq([FromRoute] Guid id, CommentToDeclinedRequestDTO comment)
         {
-            await _deaneryService.DeclineRequest(id, comment);
+            await _requestService.DeclineRequest(id, comment);
             return Ok();
         }
 
@@ -64,7 +66,7 @@ namespace PassTrackerAPI.Controllers
         [HttpPut("prolong-request/{id}"), Authorize(Roles = "Admin,Deanery"), CheckTokenLife]
         public async Task<IActionResult> ProlongEducationRequest([FromRoute] Guid id, FinishDateDTO FinishDate)
         {
-            await _deaneryService.ProlongEducationRequest(id, FinishDate);
+            await _requestService.ProlongEducationRequest(id, FinishDate);
             return Ok();
         }
 

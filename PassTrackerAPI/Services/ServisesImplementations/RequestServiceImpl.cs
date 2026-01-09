@@ -16,13 +16,11 @@ namespace PassTrackerAPI.Services.ServisesImplementations
     {
         private readonly DataContext _context;
         private readonly IUserRepository _userRepository;
-        private readonly IRequestRepository _requestRepository;
 
-        public RequestServiceImpl(DataContext context, IUserRepository userRepository, IRequestRepository requestRepository)
+        public RequestServiceImpl(DataContext context, IUserRepository userRepository)
         {
             _context = context;
             _userRepository = userRepository;
-            _requestRepository = requestRepository;
         }
 
         public async Task CreateRequest(RequestCreateDTO request, ClaimsPrincipal user)
@@ -64,7 +62,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var req = await _requestRepository.GetRequestById(requestId);
+            var req = await GetRequestById(requestId);
 
             if (req.User.Id != new Guid(userId))
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION,
@@ -86,7 +84,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var req = await _requestRepository.GetRequestById(requestId);
+            var req = await GetRequestById(requestId);
 
             if (req.User.Id != new Guid(userId)) 
                 throw new InvalidActionException(ErrorTitles.INVALID_ACTION,
@@ -109,7 +107,7 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             if (userId == null)
                 throw new UnauthorizedAccessException();
 
-            var req = await _requestRepository.GetRequestById(requestId);
+            var req = await GetRequestById(requestId);
 
             var userProfile = await _userRepository.GetUserById(new Guid(userId));
 
@@ -229,6 +227,48 @@ namespace PassTrackerAPI.Services.ServisesImplementations
             };
 
             return response;
+        }
+
+        public async Task AcceptRequest(Guid requestId)
+        {
+            var req = await GetRequestById(requestId);
+
+            req.Comment = null;
+            req.StatusRequest = StatusRequestDB.Accepted;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeclineRequest(Guid requestId, CommentToDeclinedRequestDTO Comment)
+        {
+            var req = await GetRequestById(requestId);
+
+            req.StatusRequest = StatusRequestDB.Declined;
+            req.Comment = Comment.Comment;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ProlongEducationRequest(Guid requestId, FinishDateDTO Date)
+        {
+            var req = await GetRequestById(requestId);
+
+            if (req.TypeRequest != TypeRequestDB.EducationalActivity)
+                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.NOT_EXISTING_REQUEST);
+            if (req.StatusRequest != StatusRequestDB.Accepted)
+                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CAN_PROLONG_ONLY_ACCEPTED_REQUEST);
+            if (req.FinishDate > Date.FinishDate)
+                throw new NotFoundException(ErrorTitles.REQUEST_ERROR, ErrorMessages.YOU_CANT_SHORT_REQUEST);
+
+            req.FinishDate = Date.FinishDate;
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<RequestDB> GetRequestById(Guid id)
+        {
+            var req = await _context.Requests.Include(el => el.User).FirstOrDefaultAsync(r => r.Id == id);
+
+            if (req == null) throw new NotFoundException(ErrorTitles.KEY_NOT_FOUND, ErrorMessages.NOT_EXISTING_REQUEST);
+
+            return req;
         }
     }
 }
